@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Daily Huddle Builder</title>
+<style>
+  :root {
+    --bg: #ffffff; --text: #111111; --sub-text: #6b7280; --card-border: #e5e7eb;
+    --heading: #374151; --input-border: #d1d5db; --input-bg: #ffffff; --input-text: #111111;
+    --placeholder-row-border: #f3f4f6; --dept-label: #9ca3af; --btn-primary-bg: #111111;
+    --btn-primary-text: #ffffff; --btn-secondary-bg: #ffffff; --btn-secondary-text: #374151;
+    --btn-shuffle-bg: #f9fafb; --output-bg: #f9fafb; --status-color: #16a34a;
+    --date-note-color: #92400e; --date-note-bg: #fffbeb; --date-note-border: #fde68a;
+    --gold: #b45309; --trophy: #6b7280;
+  }
+  [data-theme="dark"] {
+    --bg: #14161a; --text: #f2f2f2; --sub-text: #9ca3af; --card-border: #2c2f36;
+    --heading: #d1d5db; --input-border: #3a3d45; --input-bg: #1e2025; --input-text: #f2f2f2;
+    --placeholder-row-border: #2c2f36; --dept-label: #6b7280; --btn-primary-bg: #f2f2f2;
+    --btn-primary-text: #14161a; --btn-secondary-bg: #1e2025; --btn-secondary-text: #d1d5db;
+    --btn-shuffle-bg: #1e2025; --output-bg: #1a1c21; --status-color: #4ade80;
+    --date-note-color: #fbbf24; --date-note-bg: #2a2410; --date-note-border: #4b3f14;
+    --gold: #d99a3f; --trophy: #9ca3af;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px 16px; max-width: 640px; margin: 0 auto; transition: background 0.15s, color 0.15s; }
+  .top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+  .sub { font-size: 13px; color: var(--sub-text); margin-bottom: 20px; }
+  .theme-toggle { padding: 7px 12px; border-radius: 20px; border: 1px solid var(--input-border); background: var(--btn-secondary-bg); color: var(--btn-secondary-text); font-size: 12px; white-space: nowrap; }
+  .card { border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 13px; font-weight: 700; color: var(--heading); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  label { display: block; font-size: 13px; color: var(--heading); margin-bottom: 4px; margin-top: 10px; }
+  label:first-child { margin-top: 0; }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    width: 100%; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--input-border); font-size: 14px; font-family: inherit; background: var(--input-bg); color: var(--input-text);
+  }
+  textarea { min-height: 50px; resize: vertical; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  .dept-row { display: flex; gap: 8px; align-items: flex-end; padding: 10px 0; border-bottom: 1px solid var(--placeholder-row-border); }
+  .dept-row:last-child { border-bottom: none; }
+  .dept-name { flex: 1.1; font-size: 13px; font-weight: 600; padding-top: 8px; }
+  .dept-field { flex: 1; }
+  .dept-field label { font-size: 11px; margin: 0 0 2px 0; color: var(--dept-label); }
+  .vp-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--placeholder-row-border); }
+  .vp-row:last-child { border-bottom: none; }
+  .vp-name { flex: 1.3; font-size: 13px; font-weight: 600; }
+  .vp-field { flex: 1; }
+  button { cursor: pointer; font-family: inherit; }
+  .btn-primary { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--btn-primary-bg); color: var(--btn-primary-text); font-size: 16px; font-weight: 700; margin-top: 4px; }
+  .btn-secondary { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--input-border); background: var(--btn-secondary-bg); color: var(--btn-secondary-text); font-size: 13px; }
+  .btn-shuffle { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--input-border); background: var(--btn-shuffle-bg); color: var(--btn-secondary-text); font-size: 12px; margin-bottom: 6px; }
+  #output { white-space: pre-wrap; font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.6; background: var(--output-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; margin-top: 8px; }
+  .copy-bar { display: flex; gap: 8px; margin-top: 10px; }
+  .status { font-size: 12px; color: var(--status-color); margin-top: 6px; display: none; }
+  .date-note { font-size: 12px; color: var(--date-note-color); background: var(--date-note-bg); border: 1px solid var(--date-note-border); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+  .gold { color: var(--gold); font-weight: 700; }
+  .trophy { color: var(--trophy); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>Daily Huddle Builder</h1>
+    <div class="sub">Fill in today's info, get a copy-paste ready email</div>
+  </div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">&#127769; Dark</button>
+</div>
+
+<div class="card">
+  <h2>Date</h2>
+  <input type="date" id="huddleDate">
+  <div class="date-note" id="dateNote"></div>
+</div>
+
+<div class="card">
+  <h2>Store Performance</h2>
+  <label>Today's Projection ($)</label>
+  <input type="number" id="todayProjection" placeholder="13500">
+  <div class="row">
+    <div><label>Sales WTD Actual ($)</label><input type="number" id="storeSales" placeholder="58200"></div>
+    <div><label>Sales WTD Projection ($)</label><input type="number" id="storeGoal" placeholder="60000"></div>
+  </div>
+  <label>Sales WTD, Same Week Last Year ($)</label>
+  <input type="number" id="lastYearSales" placeholder="55850">
+  <div class="row">
+    <div><label>Labor Actual (%)</label><input type="number" step="0.1" id="laborActual" placeholder="14.5"></div>
+    <div><label>Labor Projection (%) <span style="color:#9ca3af;font-weight:400;">(saved)</span></label><input type="number" step="0.1" id="laborGoal" placeholder="14.0"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>DUG (Drive Up &amp; Go)</h2>
+  <div class="row">
+    <div><label>On-Time Tilling (%)</label><input type="number" step="0.1" id="ott" placeholder="92"></div>
+    <div><label>On-Time Hand-Off (%)</label><input type="number" step="0.1" id="oth" placeholder="88"></div>
+  </div>
+  <label>Pre-Subs (%)</label>
+  <input type="number" step="0.1" id="presubs" placeholder="4.2">
+  <div class="row">
+    <div>
+      <label>Most Pre-Subs Today</label>
+      <select id="presubDept"></select>
+    </div>
+    <div><label>Item Count</label><input type="number" id="presubCount" placeholder="6"></div>
+  </div>
+  <label>Picker Callout (free text)</label>
+  <input type="text" id="pickerCallout" placeholder="e.g., cher421, 5 late hand-offs">
+</div>
+
+<div class="card">
+  <h2>Department Sales</h2>
+  <div id="deptRows"></div>
+</div>
+
+<div class="card">
+  <h2>Vision Pro</h2>
+  <div id="vpRows"></div>
+</div>
+
+<div class="card">
+  <h2>Food Safety Spotlight</h2>
+  <button class="btn-shuffle" onclick="shuffle('foodSafetyText', foodSafetyPresets, 'foodSafety')">Shuffle Tip</button>
+  <textarea id="foodSafetyText"></textarea>
+</div>
+
+<div class="card">
+  <h2>Safety Focus</h2>
+  <button class="btn-shuffle" onclick="shuffle('safetyText', safetyPresets, 'safety')">Shuffle Tip</button>
+  <textarea id="safetyText"></textarea>
+</div>
+
+<div class="card">
+  <h2>Store Notes</h2>
+  <textarea id="storeNotes" placeholder="Auditors in the area, schedules due, general ops notes..."></textarea>
+</div>
+
+<div class="card">
+  <h2 class="gold">Gold Star Department</h2>
+  <label>Department</label>
+  <select id="goldDept"></select>
+  <label>Why they earned it</label>
+  <input type="text" id="goldReason" placeholder="e.g., crushed sales goal, spotless case, great teamwork">
+</div>
+
+<div class="card">
+  <h2 class="trophy">Participation Trophy Department</h2>
+  <label>Department</label>
+  <select id="trophyDept"></select>
+  <label>Reason (pick one)</label>
+  <select id="trophyReason">
+    <option value="">-- Select a reason --</option>
+    <option value="a missed sales goal">Missed sales goal</option>
+    <option value="Vision Pro completion behind">Vision Pro completion behind</option>
+    <option value="high shrink/distress">High shrink / distress</option>
+    <option value="a food safety violation">Food safety violation</option>
+    <option value="a safety violation">Safety violation</option>
+    <option value="custom">Other (type below)</option>
+  </select>
+  <label>Custom detail (optional)</label>
+  <input type="text" id="trophyCustom" placeholder="Add specifics if needed">
+</div>
+
+<button class="btn-primary" onclick="generate()">Generate Newsletter</button>
+
+<div class="card" id="outputCard" style="display:none;">
+  <h2>Ready to Copy</h2>
+  <div id="output"></div>
+  <div class="copy-bar">
+    <button class="btn-secondary" onclick="copyOutput()">Copy (Bold Headers)</button>
+    <button class="btn-secondary" onclick="copyPlain()">Copy Plain Text</button>
+  </div>
+  <div class="status" id="copyStatus">Copied!</div>
+</div>
+
+<script>
+const departments = ["Center of Store","Floral","Produce","Meat","Seafood","Liquor","Deli","Bakery","Starbucks"];
+const visionProDepts = departments.filter(d => !["Starbucks","Center of Store","Floral"].includes(d)); // these don't have Vision Pro tracking
+
+const foodSafetyPresets = [
+  "Keep personal items off food and packaging \u2014 no bags, phones, keys, or drinks stored on or above product.",
+  "Never wear your apron into the restroom, breakroom, or outside the building.",
+  "Wash hands before gloving up and any time they could be contaminated \u2014 always at a real handsink, never a prep sink.",
+  "Gloves are single-use: change them between raw and ready-to-eat tasks, when switching jobs, or after 4 hours.",
+  "Cover any cut or bandage on your hand with a glove before touching food.",
+  "Handsinks need soap, towels, and clear access at all times \u2014 hot water must hit 85\u00b0F within 60 seconds.",
+  "Hot TCS food stays at 135\u00b0F or above; cold TCS food stays at 41\u00b0F or below. One bad temp is a violation.",
+  "Using time instead of temperature to hold food? Label the discard time \u2014 max 4 hours.",
+  "Cool hot food uncovered or loosely covered, in shallow pans, in the fridge \u2014 never in deep pans or at room temp.",
+  "Take food out of bags before cooling it \u2014 trapped heat slows cooling way down.",
+  "Only thaw food in the cooler, under cold running water, in the microwave right before cooking, or as part of cooking. Never at room temperature.",
+  "Expired ready-to-eat TCS food can't stay on the shelf \u2014 even a labeling mistake still counts as expired.",
+  "Anything opened or prepped and held over 24 hours needs a date mark.",
+  "Store raw meat below ready-to-eat food, and use separate cutting boards for each.",
+  "Keep food off cardboard, shopping carts, and other unapproved surfaces, and away from drips or leaks overhead.",
+  "Produce needs a 3\u20135 minute soak in ProduceMaxx at the correct strength (30\u201360 ppm) before processing.",
+  "Food-contact surfaces need washing, rinsing, and sanitizing at least every 4 hours during use.",
+  "Sanitizer strength matters: quat should read 150\u2013400 ppm, chlorine 50\u2013100 ppm.",
+  "Label every chemical container clearly, and store chemicals away from food and food-contact surfaces.",
+  "Wiping cloths sit in sanitizer between uses \u2014 soiled ones go straight to the laundry bin, not the counter.",
+  "See any sign of pests \u2014 droppings, bugs, gnaw marks? Report it immediately.",
+  "Keep floors and drains clean and free of standing water, especially near food prep.",
+  "Refrigerated display cases need regular cleaning inside \u2014 tracks, fans, drip trays, and shelving included.",
+  "Store food and packaging at least 6 inches off the floor, and keep it covered or protected from above.",
+  "Check knives, boards, and utensils for cracks, deep grooves, or rust \u2014 damaged tools get pulled from use.",
+  "Keep a working, calibrated thermometer and current test strips on hand at all times.",
+  "Shellfish tags stay on file for 90 days after the last piece from that container sells.",
+  "Post the consumer advisory wherever raw or undercooked animal foods are sold.",
+  "The danger zone is 41\u00b0F\u2013135\u00b0F \u2014 bacteria multiply fastest between 70\u00b0F and 125\u00b0F, so don't let food sit there.",
+  "Wash hands for a full 15\u201320 seconds with warm water \u2014 get between fingers, under nails, and up to the wrists.",
+  "Sick with vomiting or diarrhea? Stay off the floor and don't return until 24 hours symptom-free.",
+  "FIFO \u2014 rotate stock so older product sells first and nothing expires unnoticed.",
+  "Reject any delivery with ice crystals, damaged packaging, or a bad smell \u2014 don't put it away."
+];
+
+const safetyPresets = [
+  "Lifting heavy boxes? Bend at the knees, keep your back straight, and ask for help with anything awkward or over 50 lbs.",
+  "Spot a spill? Clean it or flag it immediately \u2014 wet floors are one of the most common causes of injury in the store.",
+  "Box cutters cut away from your body, always. Take two extra seconds \u2014 it's worth it.",
+  "Wear your PPE when required \u2014 gloves, cut-resistant sleeves, non-slip shoes. It's there because it works.",
+  "Know where your nearest fire extinguisher and exit are. Takes 10 seconds to check, saves critical time in an emergency.",
+  "Report any equipment that feels off \u2014 wobbly ladders, sticky doors, flickering lights \u2014 before it becomes a bigger problem.",
+  "Stack heavy items on lower shelves, lighter items up top. Keeps things stable and keeps everyone safer."
+];
+
+// True no-repeat shuffle: cycles through the whole pool once before any tip repeats,
+// instead of plain Math.random() which can hit the same tip multiple days in a row.
+function getNextTip(poolKey, arr){
+  const usedKey = 'huddle_used_' + poolKey;
+  let used = [];
+  try { used = JSON.parse(localStorage.getItem(usedKey) || '[]'); } catch(e){ used = []; }
+  let remaining = arr.map((_,i)=>i).filter(i => used.indexOf(i) === -1);
+  if(remaining.length === 0){
+    // Pool exhausted: reshuffle, but avoid immediately repeating the very last tip shown
+    const lastUsed = used.length ? used[used.length-1] : -1;
+    remaining = arr.map((_,i)=>i).filter(i => i !== lastUsed);
+    used = [];
+  }
+  const pick = remaining[Math.floor(Math.random()*remaining.length)];
+  used.push(pick);
+  localStorage.setItem(usedKey, JSON.stringify(used));
+  return arr[pick];
+}
+
+
+// Known major US federal + widely-observed religious holiday dates for reference years.
+// Religious holiday dates (Easter, Ramadan, etc.) are commonly-cited observed dates, not
+// astronomical calculations, and can vary by a day depending on moon sighting/denomination.
+const holidays = {
+  2025: {
+    "01-01": "New Year's Day", "01-20": "MLK Day", "02-17": "Presidents Day",
+    "03-05": "Ash Wednesday", "04-13": "Palm Sunday", "04-18": "Good Friday", "04-20": "Easter",
+    "05-26": "Memorial Day", "06-06": "Eid al-Adha", "06-19": "Juneteenth", "07-04": "Independence Day",
+    "09-01": "Labor Day", "09-22": "Rosh Hashanah (begins prev. evening)", "10-01": "Yom Kippur (begins prev. evening)",
+    "10-13": "Columbus Day", "10-20": "Diwali", "11-11": "Veterans Day", "11-27": "Thanksgiving",
+    "12-14": "Hanukkah begins", "12-25": "Christmas"
+  },
+  2026: {
+    "01-01": "New Year's Day", "01-19": "MLK Day", "02-14": "Ash Wednesday", "02-16": "Presidents Day",
+    "03-29": "Palm Sunday", "04-03": "Good Friday", "04-05": "Easter",
+    "05-25": "Memorial Day", "05-27": "Eid al-Adha", "06-19": "Juneteenth", "07-04": "Independence Day",
+    "09-07": "Labor Day", "09-11": "Rosh Hashanah (begins prev. evening)", "09-20": "Yom Kippur (begins prev. evening)",
+    "10-12": "Columbus Day", "11-08": "Diwali", "11-11": "Veterans Day", "11-26": "Thanksgiving",
+    "12-04": "Hanukkah begins", "12-25": "Christmas"
+  }
+};
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '\u2600\ufe0f Light' : '\ud83c\udf19 Dark';
+  localStorage.setItem('huddle_theme', theme);
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem('huddle_theme') || 'light');
+
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+
+function getHolidayName(dateObj){
+  const year = dateObj.getFullYear();
+  const key = pad(dateObj.getMonth()+1) + '-' + pad(dateObj.getDate());
+  return (holidays[year] && holidays[year][key]) || null;
+}
+
+function weekdayName(dateObj){
+  return dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+function updateDateNote(){
+  const val = document.getElementById('huddleDate').value;
+  if(!val){ document.getElementById('dateNote').style.display='none'; return; }
+  const parts = val.split('-').map(Number);
+  const d = new Date(parts[0], parts[1]-1, parts[2]);
+  const lastYear = new Date(parts[0]-1, parts[1]-1, parts[2]);
+
+  let note = '';
+  const holidayName = getHolidayName(d);
+  if(holidayName){ note += 'Today is ' + holidayName + '. '; }
+  const thisWd = weekdayName(d);
+  const lastWd = weekdayName(lastYear);
+  if(thisWd !== lastWd){
+    note += 'Note: this date fell on a ' + lastWd + ' last year \u2014 this year it\u2019s a ' + thisWd + '. Keep that in mind comparing to last year\u2019s sales.';
+  } else {
+    note += 'This date fell on a ' + lastWd + ' last year too \u2014 same weekday, safe to compare directly.';
+  }
+  const noteEl = document.getElementById('dateNote');
+  noteEl.textContent = note;
+  noteEl.style.display = 'block';
+}
+
+// --- Prefill: store 1975, week of 6/28-7/4/2026, pulled from Operations/Distress/Vision Pro reports ---
+const prefill = {
+  date: '2026-07-04',
+  todayProjection: 157005,      // Sat 7/4 Target Sales (Operations report)
+  storeSales: 860595,           // WTD Actual Sales (Total column)
+  storeGoal: 810740,            // WTD Target Sales (Total column)
+  lastYearSales: 901381,        // WTD Last Year Sales (Total column)
+  laborActual: 9.97,            // WTD Calculated Salary %
+  laborGoal: 9.79,              // WTD Target Salary %
+  deptSales: {
+    // dept: [actual, projection] -- Total column, Actual Sales vs Target Sales
+    "Produce":   [98412, 89883],
+    "Meat":      [116615, 118549],
+    "Seafood":   [9875, 8786],
+    "Liquor":    [34564, 35194],
+    "Bakery":    [47644, 44350],
+    "Starbucks": [3417, 115]     // inflated vs. projection -- last year's comparison period had a closure, so this reads abnormally high; kept in Dept Sales but dropped from Vision Pro
+  },
+  visionPro: {
+    // dept: % proper production (Vision Pro / Performance by Department report)
+    "Meat":    83.19,
+    "Deli":    86.67,
+    "Bakery":  87.30,
+    "Produce": 98.28
+  }
+};
+
+document.getElementById('huddleDate').value = prefill.date;
+document.getElementById('todayProjection').value = prefill.todayProjection;
+document.getElementById('storeSales').value = prefill.storeSales;
+document.getElementById('storeGoal').value = prefill.storeGoal;
+document.getElementById('lastYearSales').value = prefill.lastYearSales;
+document.getElementById('laborActual').value = prefill.laborActual;
+document.getElementById('laborGoal').value = prefill.laborGoal;
+
+document.getElementById('huddleDate').addEventListener('change', updateDateNote);
+updateDateNote();
+
+departments.forEach(d => {
+  ['goldDept','trophyDept','presubDept'].forEach(id => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    document.getElementById(id).appendChild(opt);
+  });
+});
+
+function shuffle(fieldId, arr, poolKey){ document.getElementById(fieldId).value = getNextTip(poolKey, arr); }
+document.getElementById('foodSafetyText').value = getNextTip('foodSafety', foodSafetyPresets);
+document.getElementById('safetyText').value = getNextTip('safety', safetyPresets);
+
+const deptRowsEl = document.getElementById('deptRows');
+departments.forEach(dept => {
+  const row = document.createElement('div');
+  row.className = 'dept-row';
+  row.innerHTML = `
+    <div class="dept-name">${dept}</div>
+    <div class="dept-field"><label>Proj ($)</label><input type="number" data-dept="${dept}" data-type="goal" placeholder="0"></div>
+    <div class="dept-field"><label>Actual ($)</label><input type="number" data-dept="${dept}" data-type="sales" placeholder="0"></div>
+  `;
+  deptRowsEl.appendChild(row);
+  if (prefill.deptSales[dept]) {
+    row.querySelector('[data-type="sales"]').value = prefill.deptSales[dept][0];
+    row.querySelector('[data-type="goal"]').value = prefill.deptSales[dept][1];
+  }
+});
+
+const vpRowsEl = document.getElementById('vpRows');
+visionProDepts.forEach(dept => {
+  const row = document.createElement('div');
+  row.className = 'vp-row';
+  row.innerHTML = `
+    <div class="vp-name">${dept}</div>
+    <div class="vp-field"><input type="number" data-vp-dept="${dept}" placeholder="% complete"></div>
+  `;
+  vpRowsEl.appendChild(row);
+  if (prefill.visionPro[dept] !== undefined) {
+    row.querySelector('[data-vp-dept]').value = prefill.visionPro[dept];
+  }
+});
+
+function fmtMoney(n) {
+  if (n === '' || n === null || isNaN(n)) return '';
+  return '$' + Number(n).toLocaleString();
+}
+function pctChange(actual, base){
+  if(!base || base === '0') return null;
+  return (((actual - base) / base) * 100).toFixed(1);
+}
+
+function generate() {
+  const dateVal = document.getElementById('huddleDate').value;
+  let dateStr = '';
+  if(dateVal){
+    const parts = dateVal.split('-').map(Number);
+    const d = new Date(parts[0], parts[1]-1, parts[2]);
+    dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  const todayProjection = document.getElementById('todayProjection').value;
+  const storeSales = document.getElementById('storeSales').value;
+  const storeGoal = document.getElementById('storeGoal').value;
+  const lastYearSales = document.getElementById('lastYearSales').value;
+  const laborActual = document.getElementById('laborActual').value;
+  const laborGoal = document.getElementById('laborGoal').value;
+  if(laborGoal) localStorage.setItem('huddle_laborGoal', laborGoal);
+  const savedLaborGoal = localStorage.getItem('huddle_laborGoal');
+  const effectiveLaborGoal = laborGoal || savedLaborGoal || '';
+
+  let todayProjLine = '';
+  if(todayProjection){ todayProjLine = `Today's Projection: ${fmtMoney(todayProjection)}`; }
+
+  let salesLine = '';
+  if (storeSales && storeGoal) {
+    const pct = pctChange(storeSales, storeGoal);
+    salesLine = `Sales WTD: ACT ${fmtMoney(storeSales)} vs PROJ ${fmtMoney(storeGoal)} (${pct>=0?'+':''}${pct}%)`;
+  } else if (storeSales) {
+    salesLine = `Sales WTD: ACT ${fmtMoney(storeSales)}`;
+  }
+  let yoyLine = '';
+  if(storeSales && lastYearSales){
+    const yoy = pctChange(storeSales, lastYearSales);
+    yoyLine = `YOY: ${yoy>=0?'+':''}${yoy}%`;
+  }
+  let laborLine = '';
+  if(laborActual){
+    laborLine = `Labor: ACT ${laborActual}%` + (effectiveLaborGoal ? ` vs PROJ ${effectiveLaborGoal}%` : '');
+  }
+
+  const ott = document.getElementById('ott').value;
+  const oth = document.getElementById('oth').value;
+  const presubs = document.getElementById('presubs').value;
+  const presubDept = document.getElementById('presubDept').value;
+  const presubCount = document.getElementById('presubCount').value;
+  const pickerCallout = document.getElementById('pickerCallout').value.trim();
+
+  let deptLines = [];
+  document.querySelectorAll('#deptRows .dept-row').forEach(row => {
+    const dept = row.querySelector('.dept-name').textContent;
+    const sales = row.querySelector('[data-type="sales"]').value;
+    const goal = row.querySelector('[data-type="goal"]').value;
+    if (sales || goal) {
+      if (sales && goal) {
+        const pct = pctChange(sales, goal);
+        deptLines.push(`  ${dept} \u2014 PROJ ${fmtMoney(goal)} | ACT ${fmtMoney(sales)} | ${pct>=0?'+':''}${pct}%`);
+      } else {
+        deptLines.push(`  ${dept} \u2014 ${fmtMoney(sales || goal)}`);
+      }
+    }
+  });
+
+  let vpLines = [];
+  document.querySelectorAll('#vpRows .vp-row').forEach(row => {
+    const dept = row.querySelector('.vp-name').textContent;
+    const pct = row.querySelector('[data-vp-dept]').value;
+    if (pct !== '') vpLines.push(`${dept} - ${pct}% proper production`);
+  });
+
+  const foodSafety = document.getElementById('foodSafetyText').value.trim();
+  const safety = document.getElementById('safetyText').value.trim();
+  const storeNotes = document.getElementById('storeNotes').value.trim();
+
+  const goldDept = document.getElementById('goldDept').value;
+  const goldReason = document.getElementById('goldReason').value.trim();
+
+  const trophyDept = document.getElementById('trophyDept').value;
+  const trophyReasonValue = document.getElementById('trophyReason').value;
+  const trophyCustom = document.getElementById('trophyCustom').value.trim();
+  let trophyReasonText = '';
+  if (trophyReasonValue === 'custom') {
+    trophyReasonText = trophyCustom || 'has an opportunity today';
+  } else if (trophyReasonValue) {
+    trophyReasonText = trophyReasonValue + (trophyCustom ? ' \u2014 ' + trophyCustom : '');
+  }
+
+  // Build both plain text and HTML (bold caps headers) versions
+  const sections = [];
+
+  sections.push({header: null, body: 'Good morning, team!'});
+
+  let sp = [];
+  if(todayProjLine) sp.push(todayProjLine);
+  if(salesLine) sp.push(salesLine);
+  if(yoyLine) sp.push(yoyLine);
+  if(laborLine) sp.push(laborLine);
+  if(sp.length) sections.push({header:'STORE PERFORMANCE', body: sp.map(l => '\u2022 ' + l).join('\n')});
+
+  let dp = [];
+  if(ott) dp.push(`On-Time Tilling: ${ott}%`);
+  if(oth) dp.push(`On-Time Hand-Off: ${oth}%`);
+  if(presubs) dp.push(`Pre-Subs: ${presubs}% (Goal: 3% or below)`);
+  if(presubDept && presubCount) dp.push(`Most Pre-Subs Today: ${presubDept} (${presubCount} items)`);
+  if(pickerCallout) dp.push(`Picker Callout: ${pickerCallout}`);
+  if(dp.length) sections.push({header:'DUG (DRIVE UP & GO)', body: dp.map(l => '\u2022 ' + l).join('\n')});
+
+  if(deptLines.length) sections.push({header:'DEPARTMENT SALES', body: deptLines.map(l => '\u2022 ' + l.trim()).join('\n')});
+  if(vpLines.length) sections.push({header:'VISION PRO', body: vpLines.map(l => '\u2022 ' + l).join('\n')});
+
+  if(foodSafety) sections.push({header:'FOOD SAFETY SPOTLIGHT', body: foodSafety});
+  if(safety) sections.push({header:'SAFETY FOCUS', body: safety});
+  if(storeNotes) sections.push({header:'STORE NOTES', body: storeNotes});
+
+  if(goldDept && goldReason) sections.push({header:'GOLD STAR DEPARTMENT: ' + goldDept.toUpperCase() + ' \u2b50', body: goldReason});
+  if(trophyDept && trophyReasonText) {
+    const alreadyPunctuated = /[.!?\u2026]$/.test(trophyReasonText.trim());
+    const t = trophyReasonText.charAt(0).toUpperCase() + trophyReasonText.slice(1) + (alreadyPunctuated ? '' : '.');
+    sections.push({header:'PARTICIPATION TROPHY: ' + trophyDept.toUpperCase() + ' \ud83c\udf97\ufe0f', body: t});
+  }
+
+  sections.push({header: null, body: "Let's have a great one today! We're all in this together \u2014 let's support each other and close out any opportunities as a team."});
+
+  let plain = `Subject: Daily Huddle \u2014 ${dateStr}\n\n`;
+  let html = `<div>Subject: Daily Huddle \u2014 ${dateStr}</div><br>`;
+  sections.forEach(s => {
+    if(s.header){
+      plain += s.header + '\n' + s.body + '\n\n';
+      html += `<div><strong>${s.header}</strong></div><div>${s.body.replace(/\n/g,'<br>')}</div><br>`;
+    } else {
+      plain += s.body + '\n\n';
+      html += `<div>${s.body}</div><br>`;
+    }
+  });
+
+  window.__lastPlain = plain.trim();
+  window.__lastHtml = html;
+  document.getElementById('output').textContent = plain.trim();
+  document.getElementById('outputCard').style.display = 'block';
+  document.getElementById('outputCard').scrollIntoView({behavior:'smooth'});
+}
+
+function copyOutput() {
+  if(!window.__lastHtml){ return; }
+  try{
+    const item = new ClipboardItem({
+      'text/plain': new Blob([window.__lastPlain], {type:'text/plain'}),
+      'text/html': new Blob([window.__lastHtml], {type:'text/html'})
+    });
+    navigator.clipboard.write([item]).then(showCopied).catch(()=>{ copyPlain(); });
+  }catch(e){ copyPlain(); }
+}
+function copyPlain(){
+  navigator.clipboard.writeText(window.__lastPlain || '').then(showCopied).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = window.__lastPlain || '';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showCopied();
+  });
+}
+function showCopied(){
+  const status = document.getElementById('copyStatus');
+  status.style.display = 'block';
+  setTimeout(()=> status.style.display='none', 2000);
+}
+</script>
+</body>
+</html>
