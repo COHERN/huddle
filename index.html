@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Daily Huddle Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA; --surface: #FFFFFF; --text: #1A1B1E; --sub-text: #71757C; --line: #ECEDEF;
+    --heading: #101114; --accent: #2F6BFF; --accent-soft: #EAF0FF;
+    --input-border: #D7DAE0; --input-bg: #FFFFFF; --input-text: #101114;
+    --row-line: #EEF0F3; --dept-label: #9AA0AA; --btn-primary-bg: #101114;
+    --btn-primary-text: #FFFFFF; --btn-secondary-bg: #FFFFFF; --btn-secondary-text: #101114;
+    --btn-shuffle-bg: #F4F5F7; --output-bg: #FBFBFC; --status-color: #1E9E5A;
+    --date-note-color: #1F4FCC; --date-note-bg: #EAF0FF; --date-note-border: #C7D8FF;
+    --gold: #2F6BFF; --growth: #6B7280; --card-bg: #FFFFFF; --shadow: rgba(16,17,20,0.06);
+    --cover-bg: #101114; --cover-text: #FFFFFF; --danger: #E5484D;
+  }
+  [data-theme="dark"] {
+    --bg: #0C0D0F; --surface: #16181C; --text: #F1F2F4; --sub-text: #9BA1AC; --line: #24272E;
+    --heading: #F1F2F4; --accent: #5B8CFF; --accent-soft: #1A2338;
+    --input-border: #2C3038; --input-bg: #101216; --input-text: #F1F2F4;
+    --row-line: #20242B; --dept-label: #757C88; --btn-primary-bg: #5B8CFF;
+    --btn-primary-text: #0C0D0F; --btn-secondary-bg: #16181C; --btn-secondary-text: #F1F2F4;
+    --btn-shuffle-bg: #16181C; --output-bg: #101216; --status-color: #46C77F;
+    --date-note-color: #A9C2FF; --date-note-bg: #16233F; --date-note-border: #2A3D66;
+    --gold: #5B8CFF; --growth: #9BA1AC; --card-bg: #16181C; --shadow: rgba(0,0,0,0.4);
+    --cover-bg: #000000; --cover-text: #FFFFFF; --danger: #F2555A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text);
+    padding: 0 20px 40px 20px; max-width: 760px; margin: 0 auto; transition: background 0.15s, color 0.15s;
+    -webkit-font-smoothing: antialiased;
+  }
+  .cover {
+    background: var(--cover-bg); margin: 0 -20px 24px -20px; padding: 26px 24px 0 24px; position: relative;
+  }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  h1 {
+    font-family: 'Archivo', sans-serif; font-size: 26px; font-weight: 800;
+    letter-spacing: -0.02em; display: inline-block; color: var(--cover-text); line-height: 1.05;
+  }
+  .cover-badge {
+    display: inline-block; background: var(--accent); color: #fff; font-family: 'Inter', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 4px; margin-left: 8px; vertical-align: middle;
+  }
+  .sub { font-size: 13px; color: var(--cover-text); opacity: 0.55; margin: 0 0 18px; letter-spacing: 0; }
+  .cover .theme-toggle { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); color: var(--cover-text); }
+  .theme-toggle {
+    padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--input-border); background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.01em; white-space: nowrap;
+  }
+  .card {
+    position: relative; background: var(--card-bg); border: 1px solid var(--line);
+    border-radius: 12px; padding: 22px 20px; margin-bottom: 14px;
+  }
+  .card h2 {
+    font-family: 'Archivo', sans-serif; font-size: 15px; font-weight: 700; color: var(--heading);
+    margin-bottom: 16px; letter-spacing: -0.01em; text-align: left;
+  }
+  label { display: block; font-size: 12px; color: var(--sub-text); margin-bottom: 5px; margin-top: 16px; font-weight: 500; letter-spacing: 0; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=date] {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--input-border);
+    border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--input-bg); color: var(--input-text);
+  }
+  select {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--input-border);
+    font-size: 14px; font-family: 'Inter', sans-serif; background: var(--input-bg); color: var(--input-text);
+  }
+  textarea {
+    width: 100%; padding: 11px 12px; border-radius: 8px; border: 1.5px solid var(--input-border);
+    font-size: 14px; font-family: 'Inter', sans-serif; background: var(--input-bg); color: var(--input-text); line-height: 1.5;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea { min-height: 52px; resize: none; overflow: hidden; }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  .dept-row { display: flex; gap: 12px; align-items: flex-end; padding: 12px 0; border-bottom: 1px solid var(--row-line); }
+  .dept-row:last-child { border-bottom: none; }
+  .dept-name { flex: 1.1; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding-top: 8px; }
+  .dept-field { flex: 1; }
+  .dept-field label { font-size: 11px; margin: 0 0 4px 0; color: var(--dept-label); font-weight: 500; }
+  .vp-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--row-line); }
+  .vp-row:last-child { border-bottom: none; }
+  .vp-name { flex: 1.3; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; }
+  .vp-field { flex: 1; }
+  button { cursor: pointer; font-family: inherit; }
+  .btn-primary {
+    width: 100%; padding: 15px; border-radius: 10px; border: none;
+    background: var(--accent); color: #fff; font-family: 'Archivo', sans-serif;
+    font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em;
+    margin: 6px 0 20px; transition: filter 0.12s, transform 0.05s;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-secondary {
+    padding: 10px 16px; border-radius: 8px; border: 1.5px solid var(--input-border); background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    letter-spacing: 0; transition: border-color 0.12s, background 0.12s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-shuffle {
+    padding: 7px 13px; border-radius: 7px; border: 1.5px solid var(--input-border); background: var(--btn-shuffle-bg);
+    color: var(--btn-secondary-text); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    letter-spacing: 0; margin-bottom: 10px;
+  }
+  .btn-shuffle:hover { border-color: var(--accent); color: var(--accent); }
+  #output {
+    white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.65;
+    background: var(--output-bg); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 4px;
+  }
+  .copy-bar { display: flex; gap: 10px; margin-top: 12px; }
+  .status { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--status-color); margin-top: 10px; display: none; }
+  .date-note { font-size: 13px; color: var(--sub-text); margin-top: 8px; font-weight: 500; }
+  .src { margin: -4px 0 14px; font-size: 12px; }
+  .src summary {
+    cursor: pointer; color: var(--accent); font-weight: 600; list-style: none;
+    display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0;
+  }
+  .src summary::-webkit-details-marker { display: none; }
+  .src summary::before { content: '\24d8'; font-size: 13px; }
+  .src[open] summary { margin-bottom: 6px; }
+  .src p { color: var(--sub-text); line-height: 1.5; margin: 0; }
+  .src b { color: var(--text); font-weight: 600; }
+  .order-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .order-row input.otime { flex: 0 0 96px; }
+  .order-row input.odesc { flex: 1; }
+  .order-row button.orm {
+    flex: 0 0 auto; padding: 8px 11px; border-radius: 8px; border: 1.5px solid var(--input-border);
+    background: var(--input-bg); color: var(--sub-text); font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .order-row button.orm:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* Tab navigation */
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    flex: 1; padding: 13px 10px; border: none; border-bottom: 3px solid transparent;
+    background: transparent; color: var(--cover-text); opacity: 0.5;
+    font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.03em; cursor: pointer; transition: opacity 0.12s;
+  }
+  .tab:hover { opacity: 0.8; }
+  .tab.active { opacity: 1; border-bottom-color: var(--accent); }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Safety walk */
+  .req { color: var(--danger); }
+  .progress {
+    position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; margin-bottom: 8px;
+    font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; color: var(--text); border-bottom: 1px solid var(--line);
+  }
+  .bar { height: 7px; background: var(--line); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s; border-radius: 999px; }
+  .section-label {
+    font-family: 'Archivo', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; margin: 8px 0 4px; padding-bottom: 8px; color: var(--sub-text);
+  }
+  .high .section-label { color: var(--danger); }
+  .item { padding: 14px 0; border-bottom: 1px solid var(--row-line); }
+  .item:last-child { border-bottom: none; }
+  .item-text { font-size: 14px; line-height: 1.45; margin-bottom: 10px; }
+  .ref { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dept-label); margin-top: 4px; letter-spacing: 0; }
+  .pf { display: flex; gap: 8px; }
+  .pf button {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1.5px solid var(--input-border); background: var(--input-bg);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0;
+    cursor: pointer; color: var(--text); transition: all 0.1s;
+  }
+  .pf button.pass.sel { background: var(--status-color); border-color: var(--status-color); color: #fff; }
+  .pf button.fail.sel { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .pf button.na { flex: 0 0 auto; padding: 10px 14px; color: var(--sub-text); }
+  .pf button:hover:not(.sel) { border-color: var(--accent); }
+  .item.unanswered { outline: 2px solid var(--danger); outline-offset: 4px; border-radius: 4px; }
+  .err { color: var(--danger); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; margin-top: 12px; display: none; }
+  .walk-note { font-size: 12px; color: var(--sub-text); text-align: center; margin-top: 18px; padding-bottom: 20px; line-height: 1.5; }
+  @media print {
+    .no-print { display: none !important; }
+    .src { display: none !important; }
+    .tabs { display: none !important; }
+    .cover { background: #fff !important; margin: 0 !important; padding: 0 0 8px 0 !important; border-bottom: 2px solid #111 !important; }
+    .cover h1 { color: #111 !important; }
+    .cover-badge, .sub { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    .pf button:not(.sel) { display: none; }
+    .pf button.na { display: none !important; }
+    .pf button.sel { border: none; padding: 2px 8px; }
+    .page:not(.active) { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="top-bar">
+    <div>
+      <h1>Daily Huddle Builder</h1>
+    </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">&#127769; Dark</button>
+  </div>
+  <div class="sub">FILL IN TODAY'S INFO &mdash; GET A COPY-PASTE READY MEMO</div>
+  <div class="tabs">
+    <button class="tab active" id="tab-huddle" onclick="switchPage('huddle')">Daily Huddle</button>
+    <button class="tab" id="tab-safety" onclick="switchPage('safety')">Food Safety Walk</button>
+  </div>
+</div>
+
+<div class="page active" id="page-huddle">
+
+<div class="card">
+  <h2>Notes</h2>
+  <label>Date</label>
+  <input type="date" id="huddleDate">
+  <div class="date-note" id="dateNote"></div>
+  <label>What's going on today (order cutoffs, deliveries, anything to flag up front)</label>
+  <textarea id="dailyOrders" placeholder="e.g., Schedules due today. Projecting $746,675 with an 11.01% labor target..."></textarea>
+  <label>Order Schedule</label>
+  <div id="orderRows"></div>
+  <button class="btn-shuffle" type="button" onclick="addOrderRow()" style="margin-top:8px;">+ Add Order</button>
+</div>
+
+<div class="card">
+  <h2>Store Performance</h2>
+  <details class="src"><summary>Where these numbers come from</summary>
+  <p>Pulled from <b>Empower</b>, the <b>All Labor</b> block (store total). Today's Projection = Target Sales for today's column. WTD figures = the <b>Total</b> column for Target / Actual / Last Year Sales. Labor Actual = Calculated Salary %; Labor Projection = Target Salary %.</p>
+  </details>
+  <label>Today's Projection ($)</label>
+  <input type="text" inputmode="decimal" class="money-input" id="todayProjection" placeholder="13,500">
+  <div class="row">
+    <div><label>Sales WTD Projection ($)</label><input type="text" inputmode="decimal" class="money-input" id="storeGoal" placeholder="60,000"></div>
+    <div><label>Sales WTD Actual ($)</label><input type="text" inputmode="decimal" class="money-input" id="storeSales" placeholder="58,200"></div>
+  </div>
+  <label>Sales WTD, Same Week Last Year ($)</label>
+  <input type="text" inputmode="decimal" class="money-input" id="lastYearSales" placeholder="55,850">
+  <div class="row">
+    <div><label>Labor Actual (%)</label><input type="text" inputmode="decimal" id="laborActual" placeholder="14.5"></div>
+    <div><label>Labor Projection (%) <span style="color:#9ca3af;font-weight:400;">(saved)</span></label><input type="text" inputmode="decimal" id="laborGoal" placeholder="14.0"></div>
+  </div>
+  <label>Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts from numbers \u2014 editable)</span></label>
+  <button class="btn-shuffle" type="button" onclick="draftStoreSummary()">Draft Summary</button>
+  <textarea id="storeSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
+</div>
+
+<div class="card">
+  <h2>DUG (Drive Up &amp; Go)</h2>
+  <details class="src"><summary>Where these numbers come from</summary>
+  <p>Pulled from <b>AccuView</b>, the Scoreboard Daily Summary. On-Time Tilling = <b>OTT</b>; On-Time Hand-Off = <b>OTH-Dug</b>; Pre-Subs = <b>Pre-Sub OOS%</b>. Stats reflect yesterday's completed numbers.</p>
+  </details>
+  <div class="row">
+    <div><label>On-Time Tilling (%)</label><input type="text" inputmode="decimal" id="ott" placeholder="92"></div>
+    <div><label>On-Time Hand-Off (%)</label><input type="text" inputmode="decimal" id="oth" placeholder="88"></div>
+  </div>
+  <div class="row">
+    <div><label>Orders Placed</label><input type="text" inputmode="numeric" id="ordersPlaced" placeholder="79"></div>
+    <div><label>Items Ordered</label><input type="text" inputmode="numeric" id="itemsOrdered" placeholder="1,777"></div>
+  </div>
+  <label>Pre-Subs (%)</label>
+  <input type="text" inputmode="decimal" id="presubs" placeholder="4.2">
+  <div class="row">
+    <div>
+      <label>Pre-Subs Dept</label>
+      <select id="presubDept"></select>
+    </div>
+    <div><label>Item Count</label><input type="text" inputmode="numeric" id="presubCount" placeholder="6"></div>
+  </div>
+  <label>Notes</label>
+  <textarea id="dugNotes" placeholder="e.g., call whoever has the most outs, other callouts..."></textarea>
+</div>
+
+<div class="card">
+  <h2>Department Sales</h2>
+  <details class="src"><summary>Where these numbers come from</summary>
+  <p>Pulled from <b>Empower</b>, each department block, <b>Total</b> column. PROJ = Target Sales; ACT = Actual Sales. Dept codes map like this: 301 Grocery + 311 GMHBC = <b>Center of Store</b>; 306 Food Service + 309 Deli = <b>Deli</b>; 303 = Liquor, 315 = Floral, 316 = Bakery, 328 Coffee Bar = Starbucks, 329 = Produce, 330 = Seafood, 333 = Meat.</p>
+  </details>
+  <div id="deptRows"></div>
+  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts \u2014 editable)</span></label>
+  <button class="btn-shuffle" type="button" onclick="draftDeptSummary()">Draft Summary</button>
+  <textarea id="deptSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
+</div>
+
+<div class="card">
+  <h2>Vision Pro</h2>
+  <details class="src"><summary>Where these numbers come from</summary>
+  <p>Pulled from the <b>Vision Pro</b> report, Performance by Department \u2014 each department's <b>Proper Production Performance %</b>. Higher completion generally tracks with better sales.</p>
+  </details>
+  <div id="vpRows"></div>
+  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts &amp; correlates with sales \u2014 editable)</span></label>
+  <button class="btn-shuffle" type="button" onclick="draftVpSummary()">Draft Summary</button>
+  <textarea id="vpSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
+</div>
+
+<div class="card">
+  <h2>Food Safety Spotlight</h2>
+  <button class="btn-shuffle" onclick="shuffleFoodSafety()">Shuffle Tips</button>
+  <textarea id="foodSafetyText" style="min-height:110px;"></textarea>
+</div>
+
+<div class="card">
+  <h2>Safety Focus</h2>
+  <label>Safety Topic of the Month (optional)</label>
+  <input type="text" id="safetyTopic" placeholder="e.g., Slips, Trips &amp; Falls">
+  <label>Tip</label>
+  <button class="btn-shuffle" onclick="shuffle('safetyText', safetyPresets, 'safety')">Shuffle Tip</button>
+  <textarea id="safetyText"></textarea>
+</div>
+
+<div class="card">
+  <h2>Standout Departments</h2>
+  <details class="src"><summary>How this works</summary>
+  <p>Click <b>Draft with AI</b> and it looks at the Department Sales and Vision Pro numbers you entered, picks the department that's <b>killing it</b> and the one that's <b>struggling</b>, and writes both callouts in your voice. The callout text is editable before you generate.</p>
+  </details>
+  <button class="btn-shuffle" type="button" id="draftStandoutsBtn" onclick="draftStandouts()">Draft with AI</button>
+  <div id="aiStatus" style="font-size:12px; color:var(--sub-text); margin:8px 0; display:none;"></div>
+
+  <label style="margin-top:14px;">Killing It &mdash; <span id="standout1Name" style="color:var(--accent);">(AI picks)</span></label>
+  <textarea id="standout1Reason" placeholder="Click Draft with AI, or write your own..."></textarea>
+
+  <label style="margin-top:18px;">Needs Work &mdash; <span id="standout2Name" style="color:var(--accent);">(AI picks)</span></label>
+  <textarea id="standout2Reason" placeholder="Click Draft with AI, or write your own..."></textarea>
+</div>
+
+<button class="btn-primary" onclick="generate()">Generate Newsletter</button>
+
+<div class="card" id="outputCard" style="display:none;">
+  <h2>Ready to Copy</h2>
+  <div id="output"></div>
+  <div class="copy-bar">
+    <button class="btn-secondary" onclick="copyOutput()">Copy (Bold Headers)</button>
+    <button class="btn-secondary" onclick="printPDF()">Print PDF</button>
+  </div>
+  <div class="status" id="copyStatus">Copied!</div>
+</div>
+
+</div><!-- /page-huddle -->
+
+<div class="page" id="page-safety">
+
+  <div class="card no-print">
+    <h2>Walk Details</h2>
+    <details class="src"><summary>How this walk is scored</summary>
+    <p>Questions and point values come directly from <b>Ecolab</b> audits. Every walk starts at <b>100</b>; each failed item deducts points by risk level \u2014 <b>High \u22127</b>, <b>Medium \u22124</b>, <b>Low \u22121</b>. Ratings: 97\u2013100 Best in Class, 93\u201396 Very Good, 80\u201392 Good, 70\u201379 Needs Improvement, 60\u201369 Underperforming, under 60 Poor. Mark <b>N/A</b> to swap in a different question.</p>
+    </details>
+    <label>Audit Completed By <span class="req">*</span></label>
+    <input type="text" id="fName" placeholder="Your name">
+    <label>Department <span class="req">*</span></label>
+    <input type="text" id="fDept" placeholder="e.g., Deli">
+    <label>Store Email <span class="req">*</span></label>
+    <input type="text" id="fEmail" placeholder="you@store.com">
+  </div>
+
+  <div class="progress no-print">
+    <span id="progressText">0 of 0 answered</span>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+
+  <div id="checklist"></div>
+
+  <div class="card">
+    <h2>Work Order &amp; Notes</h2>
+    <label>Work Order Area / Machine Asset ID (if any)</label>
+    <input type="text" id="fWorkOrder" placeholder="e.g., Deli slicer #A-2241">
+    <label>Notes</label>
+    <textarea id="fNotes" placeholder="Anything found, follow-ups, work orders needed..."></textarea>
+  </div>
+
+  <div class="err" id="errMsg"></div>
+
+  <div class="copy-bar no-print" style="flex-wrap:wrap;">
+    <button class="btn-secondary" onclick="doEmailWalk()">Email My Walk</button>
+    <button class="btn-secondary" onclick="doPrintWalk()">Print</button>
+    <button class="btn-secondary" onclick="newWalkDay()">New Day's Questions</button>
+  </div>
+
+  <div class="walk-note no-print">Essentials show every day. Rotating questions vary with no-repeat logic so you cover the whole audit over time. Every item needs a Pass or Fail before emailing or printing.</div>
+
+</div><!-- /page-safety -->
+
+<script>
+const departments = ["Center of Store","Floral","Produce","Meat","Seafood","Liquor","Deli","Bakery","Starbucks"];
+const visionProDepts = departments.filter(d => !["Starbucks","Center of Store","Floral","Liquor","Seafood"].includes(d)); // these don't have Vision Pro tracking
+
+const foodSafetyPresets = [
+  "Keep personal items off food and packaging \u2014 no bags, phones, keys, or drinks stored on or above product.",
+  "Never wear your apron into the restroom, breakroom, or outside the building.",
+  "Wash hands before gloving up and any time they could be contaminated \u2014 always at a real handsink, never a prep sink.",
+  "Gloves are single-use: change them between raw and ready-to-eat tasks, when switching jobs, or after 4 hours.",
+  "Cover any cut or bandage on your hand with a glove before touching food.",
+  "Handsinks need soap, towels, and clear access at all times \u2014 hot water must hit 85\u00b0F within 60 seconds.",
+  "Hot TCS food stays at 135\u00b0F or above; cold TCS food stays at 41\u00b0F or below. One bad temp is a violation.",
+  "Using time instead of temperature to hold food? Label the discard time \u2014 max 4 hours.",
+  "Cool hot food uncovered or loosely covered, in shallow pans, in the fridge \u2014 never in deep pans or at room temp.",
+  "Take food out of bags before cooling it \u2014 trapped heat slows cooling way down.",
+  "Only thaw food in the cooler, under cold running water, in the microwave right before cooking, or as part of cooking. Never at room temperature.",
+  "Expired ready-to-eat TCS food can't stay on the shelf \u2014 even a labeling mistake still counts as expired.",
+  "Anything opened or prepped and held over 24 hours needs a date mark.",
+  "Store raw meat below ready-to-eat food, and use separate cutting boards for each.",
+  "Keep food off cardboard, shopping carts, and other unapproved surfaces, and away from drips or leaks overhead.",
+  "Produce needs a 3\u20135 minute soak in ProduceMaxx at the correct strength (30\u201360 ppm) before processing.",
+  "Food-contact surfaces need washing, rinsing, and sanitizing at least every 4 hours during use.",
+  "Sanitizer strength matters: quat should read 150\u2013400 ppm, chlorine 50\u2013100 ppm.",
+  "Label every chemical container clearly, and store chemicals away from food and food-contact surfaces.",
+  "Wiping cloths sit in sanitizer between uses \u2014 soiled ones go straight to the laundry bin, not the counter.",
+  "See any sign of pests \u2014 droppings, bugs, gnaw marks? Report it immediately.",
+  "Keep floors and drains clean and free of standing water, especially near food prep.",
+  "Refrigerated display cases need regular cleaning inside \u2014 tracks, fans, drip trays, and shelving included.",
+  "Store food and packaging at least 6 inches off the floor, and keep it covered or protected from above.",
+  "Check knives, boards, and utensils for cracks, deep grooves, or rust \u2014 damaged tools get pulled from use.",
+  "Keep a working, calibrated thermometer and current test strips on hand at all times.",
+  "Shellfish tags stay on file for 90 days after the last piece from that container sells.",
+  "Post the consumer advisory wherever raw or undercooked animal foods are sold.",
+  "The danger zone is 41\u00b0F\u2013135\u00b0F \u2014 bacteria multiply fastest between 70\u00b0F and 125\u00b0F, so don't let food sit there.",
+  "Wash hands for a full 15\u201320 seconds with warm water \u2014 get between fingers, under nails, and up to the wrists.",
+  "Sick with vomiting or diarrhea? Stay off the floor and don't return until 24 hours symptom-free.",
+  "FIFO \u2014 rotate stock so older product sells first and nothing expires unnoticed.",
+  "Reject any delivery with ice crystals, damaged packaging, or a bad smell \u2014 don't put it away."
+];
+
+const safetyPresets = [
+  "Lifting heavy boxes? Bend at the knees, keep your back straight, and ask for help with anything awkward or over 50 lbs.",
+  "Spot a spill? Clean it or flag it immediately \u2014 wet floors are one of the most common causes of injury in the store.",
+  "Box cutters cut away from your body, always. Take two extra seconds \u2014 it's worth it.",
+  "Wear your PPE when required \u2014 gloves, cut-resistant sleeves, non-slip shoes. It's there because it works.",
+  "Know where your nearest fire extinguisher and exit are. Takes 10 seconds to check, saves critical time in an emergency.",
+  "Report any equipment that feels off \u2014 wobbly ladders, sticky doors, flickering lights \u2014 before it becomes a bigger problem.",
+  "Stack heavy items on lower shelves, lighter items up top. Keeps things stable and keeps everyone safer."
+];
+
+// True no-repeat shuffle: cycles through the whole pool once before any tip repeats,
+// instead of plain Math.random() which can hit the same tip multiple days in a row.
+function getNextTip(poolKey, arr){
+  const usedKey = 'huddle_used_' + poolKey;
+  let used = [];
+  try { used = JSON.parse(localStorage.getItem(usedKey) || '[]'); } catch(e){ used = []; }
+  let remaining = arr.map((_,i)=>i).filter(i => used.indexOf(i) === -1);
+  if(remaining.length === 0){
+    // Pool exhausted: reshuffle, but avoid immediately repeating the very last tip shown
+    const lastUsed = used.length ? used[used.length-1] : -1;
+    remaining = arr.map((_,i)=>i).filter(i => i !== lastUsed);
+    used = [];
+  }
+  const pick = remaining[Math.floor(Math.random()*remaining.length)];
+  used.push(pick);
+  localStorage.setItem(usedKey, JSON.stringify(used));
+  return arr[pick];
+}
+
+
+// Known major US federal + widely-observed religious holiday dates for reference years.
+// Religious holiday dates (Easter, Ramadan, etc.) are commonly-cited observed dates, not
+// astronomical calculations, and can vary by a day depending on moon sighting/denomination.
+const holidays = {
+  2025: {
+    "01-01": "New Year's Day", "01-20": "MLK Day", "02-17": "Presidents Day",
+    "03-05": "Ash Wednesday", "04-13": "Palm Sunday", "04-18": "Good Friday", "04-20": "Easter",
+    "05-26": "Memorial Day", "06-06": "Eid al-Adha", "06-19": "Juneteenth", "07-04": "Independence Day",
+    "09-01": "Labor Day", "09-22": "Rosh Hashanah (begins prev. evening)", "10-01": "Yom Kippur (begins prev. evening)",
+    "10-13": "Columbus Day", "10-20": "Diwali", "11-11": "Veterans Day", "11-27": "Thanksgiving",
+    "12-14": "Hanukkah begins", "12-25": "Christmas"
+  },
+  2026: {
+    "01-01": "New Year's Day", "01-19": "MLK Day", "02-14": "Ash Wednesday", "02-16": "Presidents Day",
+    "03-29": "Palm Sunday", "04-03": "Good Friday", "04-05": "Easter",
+    "05-25": "Memorial Day", "05-27": "Eid al-Adha", "06-19": "Juneteenth", "07-04": "Independence Day",
+    "09-07": "Labor Day", "09-11": "Rosh Hashanah (begins prev. evening)", "09-20": "Yom Kippur (begins prev. evening)",
+    "10-12": "Columbus Day", "11-08": "Diwali", "11-11": "Veterans Day", "11-26": "Thanksgiving",
+    "12-04": "Hanukkah begins", "12-25": "Christmas"
+  }
+};
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '\u2600\ufe0f Light' : '\ud83c\udf19 Dark';
+  localStorage.setItem('huddle_theme', theme);
+}
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem('huddle_theme') || 'light');
+
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+
+function getHolidayName(dateObj){
+  const year = dateObj.getFullYear();
+  const key = pad(dateObj.getMonth()+1) + '-' + pad(dateObj.getDate());
+  return (holidays[year] && holidays[year][key]) || null;
+}
+
+function updateDateNote(){
+  const val = document.getElementById('huddleDate').value;
+  const noteEl = document.getElementById('dateNote');
+  if(!val){ noteEl.style.display='none'; return; }
+  const parts = val.split('-').map(Number);
+  const d = new Date(parts[0], parts[1]-1, parts[2]);
+  const holidayName = getHolidayName(d);
+  if(holidayName){
+    noteEl.textContent = 'Today is ' + holidayName + '.';
+    noteEl.style.display = 'block';
+  } else {
+    noteEl.style.display = 'none';
+  }
+}
+
+// --- Prefill: store 1975, week of 6/28-7/4/2026, pulled from Operations/Distress/Vision Pro reports ---
+const prefill = {
+  date: '2026-07-07',
+  todayProjection: 105131,      // Tue 7/7 Target Sales (Empower, All Labor block)
+  storeSales: 752556,           // WTD Actual Sales, Total column (All Labor)
+  storeGoal: 751297,            // WTD Target Sales, Total column (All Labor)
+  lastYearSales: 1005191,       // WTD Last Year Sales, Total column (All Labor)
+  laborActual: 11.08,           // Empower Forecast Salary % (district scorecard)
+  laborGoal: 10.99,             // Updated Target Salary % (district scorecard)
+  deptSales: {
+    // dept: [actual, projection] -- Mon 7/6 (yesterday's completed column), Actual vs Target Sales
+    // Center of Store = 301 Grocery + 311 GMHBC; Deli = 306 Food Service + 309 Deli
+    "Center of Store": [60826, 63724],
+    "Produce":   [12177, 12908],
+    "Meat":      [12394, 14347],
+    "Deli":      [6397, 6306],
+    "Bakery":    [5065, 5647],
+    "Liquor":    [2161, 2271],
+    "Seafood":   [1470, 1221],
+    "Floral":    [1350, 1254],
+    "Starbucks": [762, 735]
+  },
+  visionPro: {
+    // dept: % proper production (Vision Pro / Performance by Department report)
+    "Meat":    83.19,
+    "Deli":    86.67,
+    "Bakery":  87.30,
+    "Produce": 98.28
+  }
+};
+
+function formatWithCommas(v){
+  if(v === '' || v === null || v === undefined) return '';
+  const num = parseFloat(String(v).replace(/,/g,''));
+  if(isNaN(num)) return '';
+  return num.toLocaleString('en-US');
+}
+function attachMoneyFormatting(input){
+  input.addEventListener('input', () => {
+    const raw = input.value.replace(/[^\d.]/g,'');
+    input.value = formatWithCommas(raw);
+  });
+}
+
+document.getElementById('huddleDate').value = prefill.date;
+document.getElementById('todayProjection').value = formatWithCommas(prefill.todayProjection);
+document.getElementById('storeSales').value = formatWithCommas(prefill.storeSales);
+document.getElementById('storeGoal').value = formatWithCommas(prefill.storeGoal);
+document.getElementById('lastYearSales').value = formatWithCommas(prefill.lastYearSales);
+document.getElementById('laborActual').value = prefill.laborActual;
+document.getElementById('laborGoal').value = prefill.laborGoal;
+
+['todayProjection','storeSales','storeGoal','lastYearSales'].forEach(id => attachMoneyFormatting(document.getElementById(id)));
+
+document.getElementById('huddleDate').addEventListener('change', updateDateNote);
+updateDateNote();
+
+departments.forEach(d => {
+  ['presubDept'].forEach(id => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    document.getElementById(id).appendChild(opt);
+  });
+});
+
+// --- Dummy sample data for fields not covered by the real report prefill above ---
+document.getElementById('dailyOrders').value = 'Schedules are due today. You all have access to Empower, and the forecast is in. Today we are projecting $105,131 with a labor target of 10.99%. After all schedules are put in, we cannot exceed 10.99%.';
+
+// --- Order Schedule rows ---
+function addOrderRow(time, desc){
+  const wrap = document.getElementById('orderRows');
+  const row = document.createElement('div');
+  row.className = 'order-row';
+  row.innerHTML = `
+    <input type="text" class="otime" placeholder="09:30" value="${time||''}">
+    <input type="text" class="odesc" placeholder="Perishable Order" value="${desc||''}">
+    <button type="button" class="orm" title="Remove" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  wrap.appendChild(row);
+}
+addOrderRow('09:30', 'Perishable Order');
+addOrderRow('14:00', 'Grocery Order');
+
+document.getElementById('ott').value = '90.2';
+document.getElementById('oth').value = '94.1';
+document.getElementById('ordersPlaced').value = '79';
+document.getElementById('itemsOrdered').value = '1,777';
+document.getElementById('presubs').value = '3.8';
+document.getElementById('presubDept').value = 'Meat';
+document.getElementById('presubCount').value = '';
+document.getElementById('dugNotes').value = '';
+document.getElementById('safetyTopic').value = 'Hazardous Energy';
+
+function shuffle(fieldId, arr, poolKey){ const el = document.getElementById(fieldId); el.value = getNextTip(poolKey, arr); autoGrow(el); }
+function getNextTips(poolKey, arr, count){
+  const tips = [];
+  for(let i=0;i<count;i++){ tips.push(getNextTip(poolKey, arr)); }
+  return tips;
+}
+function shuffleFoodSafety(){ const el = document.getElementById('foodSafetyText'); el.value = getNextTips('foodSafety', foodSafetyPresets, 4).map(t => '\u2022 ' + t).join('\n\n'); autoGrow(el); }
+document.getElementById('foodSafetyText').value = getNextTips('foodSafety', foodSafetyPresets, 4).map(t => '\u2022 ' + t).join('\n\n');
+document.getElementById('safetyText').value = getNextTip('safety', safetyPresets);
+
+const deptRowsEl = document.getElementById('deptRows');
+departments.forEach(dept => {
+  const row = document.createElement('div');
+  row.className = 'dept-row';
+  row.innerHTML = `
+    <div class="dept-name">${dept}</div>
+    <div class="dept-field"><label>Proj ($)</label><input type="text" inputmode="decimal" class="money-input" data-dept="${dept}" data-type="goal" placeholder="0"></div>
+    <div class="dept-field"><label>Actual ($)</label><input type="text" inputmode="decimal" class="money-input" data-dept="${dept}" data-type="sales" placeholder="0"></div>
+  `;
+  deptRowsEl.appendChild(row);
+  if (prefill.deptSales[dept]) {
+    row.querySelector('[data-type="sales"]').value = formatWithCommas(prefill.deptSales[dept][0]);
+    row.querySelector('[data-type="goal"]').value = formatWithCommas(prefill.deptSales[dept][1]);
+  }
+});
+
+const vpRowsEl = document.getElementById('vpRows');
+visionProDepts.forEach(dept => {
+  const row = document.createElement('div');
+  row.className = 'vp-row';
+  row.innerHTML = `
+    <div class="vp-name">${dept}</div>
+    <div class="vp-field"><input type="text" inputmode="decimal" data-vp-dept="${dept}" placeholder="% complete"></div>
+  `;
+  vpRowsEl.appendChild(row);
+  if (prefill.visionPro[dept] !== undefined) {
+    row.querySelector('[data-vp-dept]').value = prefill.visionPro[dept];
+  }
+});
+
+document.querySelectorAll('.money-input').forEach(attachMoneyFormatting);
+
+// Auto-grow textareas to fit their content
+function autoGrow(el){ el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+document.querySelectorAll('textarea').forEach(ta => {
+  ta.addEventListener('input', () => autoGrow(ta));
+  autoGrow(ta);
+});
+
+function fmtMoney(n) {
+  if (n === '' || n === null || n === undefined) return '';
+  const num = parseFloat(String(n).replace(/,/g,''));
+  if (isNaN(num)) return '';
+  return '$' + num.toLocaleString();
+}
+function pctChange(actual, base){
+  const a = parseFloat(String(actual).replace(/,/g,''));
+  const b = parseFloat(String(base).replace(/,/g,''));
+  if(!b || isNaN(a) || isNaN(b)) return null;
+  return (((a - b) / b) * 100).toFixed(1);
+}
+
+/* ============ STANDOUT DEPARTMENTS (AI-assisted) ============ */
+// Gather each dept's yesterday sales B/W % and Vision Pro %, from the entered rows
+// Departments never eligible for standout callouts (too small-volume; % swings are noise)
+const STANDOUT_EXCLUDE = ["Seafood", "Starbucks"];
+
+function gatherDeptData(){
+  const sales = {};
+  document.querySelectorAll('#deptRows .dept-row').forEach(row => {
+    const dept = row.querySelector('.dept-name').textContent;
+    if(STANDOUT_EXCLUDE.includes(dept)) return;
+    const proj = row.querySelector('[data-type="goal"]').value;
+    const act = row.querySelector('[data-type="sales"]').value;
+    if(proj && act){
+      const pct = pctChange(act, proj);
+      sales[dept] = { proj, act, bw: pct === null ? null : parseFloat(pct) };
+    }
+  });
+  const vp = {};
+  document.querySelectorAll('#vpRows .vp-row').forEach(row => {
+    const dept = row.querySelector('.vp-name').textContent;
+    if(STANDOUT_EXCLUDE.includes(dept)) return;
+    const v = row.querySelector('[data-vp-dept]').value;
+    if(v !== '') vp[dept] = parseFloat(v);
+  });
+  // Merge into a list
+  const depts = {};
+  Object.keys(sales).forEach(d => { depts[d] = { dept:d, ...sales[d], vp: (d in vp ? vp[d] : null) }; });
+  Object.keys(vp).forEach(d => { if(!depts[d]) depts[d] = { dept:d, bw:null, vp:vp[d] }; });
+  return Object.values(depts);
+}
+
+// Rank: sales B/W leads, Vision Pro is context. Returns {top, bottom}.
+function rankStandouts(list){
+  const scored = list.filter(d => d.bw !== null || d.vp !== null).map(d => {
+    // Primary = sales B/W; secondary nudge from VP (each 10 VP pts ~ 1 B/W pt of influence)
+    const bw = (d.bw === null ? 0 : d.bw);
+    const vpAdj = (d.vp === null ? 0 : (d.vp - 85) / 10);
+    return { ...d, score: bw + vpAdj };
+  });
+  if(scored.length < 2) return null;
+  scored.sort((a,b) => b.score - a.score);
+  return { top: scored[0], bottom: scored[scored.length - 1] };
+}
+
+function fmtDeptForAI(d){
+  let parts = [];
+  if(d.bw !== null) parts.push(`sales ${d.bw>=0?'+':''}${d.bw}% vs projection (proj ${fmtMoney(d.proj)}, actual ${fmtMoney(d.act)})`);
+  if(d.vp !== null) parts.push(`Vision Pro ${d.vp}% proper production`);
+  return parts.join(', ');
+}
+
+async function draftStandouts(){
+  const btn = document.getElementById('draftStandoutsBtn');
+  const status = document.getElementById('aiStatus');
+  const list = gatherDeptData();
+  const ranked = rankStandouts(list);
+  if(!ranked){
+    status.style.display = 'block';
+    status.textContent = 'Enter sales and/or Vision Pro numbers for at least two departments first.';
+    return;
+  }
+  // Set the dropdowns to the picked departments
+  document.getElementById('standout1Name').textContent = ranked.top.dept;
+  document.getElementById('standout2Name').textContent = ranked.bottom.dept;
+
+  // Compute store-average VP for context
+  const vps = list.filter(d => d.vp !== null).map(d => d.vp);
+  const vpAvg = vps.length ? Math.round(vps.reduce((s,v)=>s+v,0)/vps.length*100)/100 : null;
+
+  const payload = {
+    top: { dept: ranked.top.dept, detail: fmtDeptForAI(ranked.top) },
+    bottom: { dept: ranked.bottom.dept, detail: fmtDeptForAI(ranked.bottom) },
+    storeVpAvg: vpAvg
+  };
+
+  btn.disabled = true;
+  status.style.display = 'block';
+  status.textContent = 'Drafting in your voice\u2026';
+  try {
+    const res = await fetch('/.netlify/functions/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: 'standouts', data: payload })
+    });
+    if(!res.ok){ throw new Error('HTTP ' + res.status); }
+    const out = await res.json();
+    if(out.top) document.getElementById('standout1Reason').value = out.top;
+    if(out.bottom) document.getElementById('standout2Reason').value = out.bottom;
+    document.querySelectorAll('#standout1Reason, #standout2Reason').forEach(autoGrow);
+    status.textContent = 'Drafted \u2014 edit anything before you generate.';
+  } catch(err){
+    status.textContent = "Couldn't reach the AI. You can still type the callouts yourself, or check that the site is deployed on Netlify with an API key set.";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function generate() {
+  const dateVal = document.getElementById('huddleDate').value;
+  let dateStr = '';
+  if(dateVal){
+    const parts = dateVal.split('-').map(Number);
+    const d = new Date(parts[0], parts[1]-1, parts[2]);
+    dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  const todayProjection = document.getElementById('todayProjection').value;
+  const storeSales = document.getElementById('storeSales').value;
+  const storeGoal = document.getElementById('storeGoal').value;
+  const lastYearSales = document.getElementById('lastYearSales').value;
+  const laborActual = document.getElementById('laborActual').value;
+  const laborGoal = document.getElementById('laborGoal').value;
+  if(laborGoal) localStorage.setItem('huddle_laborGoal', laborGoal);
+  const savedLaborGoal = localStorage.getItem('huddle_laborGoal');
+  const effectiveLaborGoal = laborGoal || savedLaborGoal || '';
+
+  // Store Performance as aligned rows: label | PROJ | ACT | B/W
+  let spRows = [];
+  if(todayProjection){ spRows.push({label:"Today's Projection", proj:'', act: fmtMoney(todayProjection), bw:''}); }
+  if(storeSales && storeGoal){
+    const pct = pctChange(storeSales, storeGoal);
+    spRows.push({label:'Sales WTD', proj: fmtMoney(storeGoal), act: fmtMoney(storeSales), bw: `${pct>=0?'+':''}${pct}%`});
+  } else if(storeSales){
+    spRows.push({label:'Sales WTD', proj:'', act: fmtMoney(storeSales), bw:''});
+  }
+  if(storeSales && lastYearSales){
+    const yoy = pctChange(storeSales, lastYearSales);
+    spRows.push({label:'Sales WTD (LY)', proj:'', act: fmtMoney(lastYearSales), bw: `${yoy>=0?'+':''}${yoy}%`});
+  }
+  if(laborActual && effectiveLaborGoal){
+    const diff = (parseFloat(laborActual) - parseFloat(effectiveLaborGoal)).toFixed(2);
+    spRows.push({label:'Labor %', proj: `${effectiveLaborGoal}%`, act: `${laborActual}%`, bw: `${diff>=0?'+':''}${diff}%`});
+  } else if(laborActual){
+    spRows.push({label:'Labor %', proj:'', act: `${laborActual}%`, bw:''});
+  }
+  function alignRow(label, proj, act, bw){
+    return label.padEnd(20) + proj.padStart(11) + '  ' + act.padStart(11) + '  ' + bw.padStart(8);
+  }
+  let spLines = [];
+  if(spRows.length){
+    spLines.push(alignRow('', 'PROJ', 'ACT', 'B/W'));
+    spRows.forEach(r => spLines.push(alignRow(r.label, r.proj, r.act, r.bw)));
+  }
+
+  const ott = document.getElementById('ott').value;
+  const oth = document.getElementById('oth').value;
+  const ordersPlaced = document.getElementById('ordersPlaced').value.trim();
+  const itemsOrdered = document.getElementById('itemsOrdered').value.trim();
+  const presubs = document.getElementById('presubs').value;
+  const presubDept = document.getElementById('presubDept').value;
+  const presubCount = document.getElementById('presubCount').value;
+  const dailyOrders = document.getElementById('dailyOrders').value.trim();
+  const dugNotes = document.getElementById('dugNotes').value.trim();
+
+  // Order schedule rows
+  let orderLines = [];
+  document.querySelectorAll('#orderRows .order-row').forEach(row => {
+    const time = row.querySelector('.otime').value.trim();
+    const desc = row.querySelector('.odesc').value.trim();
+    if(time || desc) orderLines.push(`${time}${time&&desc?'  ':''}${desc}`);
+  });
+
+  let deptEntries = [];
+  document.querySelectorAll('#deptRows .dept-row').forEach(row => {
+    const dept = row.querySelector('.dept-name').textContent;
+    const sales = row.querySelector('[data-type="sales"]').value;
+    const goal = row.querySelector('[data-type="goal"]').value;
+    if (sales || goal) {
+      const sortVal = parseFloat(String(sales || goal).replace(/,/g,'')) || 0;
+      deptEntries.push({dept, sales, goal, sortVal});
+    }
+  });
+  deptEntries.sort((a,b) => b.sortVal - a.sortVal);
+  let deptRows = deptEntries.map(({dept, sales, goal}) => {
+    if (sales && goal) {
+      const pct = pctChange(sales, goal);
+      return {dept, proj: fmtMoney(goal), act: fmtMoney(sales), bw: `${pct>=0?'+':''}${pct}%`};
+    }
+    return {dept, proj: '', act: fmtMoney(sales || goal), bw: ''};
+  });
+  // Plain/copy text: aligned columns with header
+  let deptLines = [];
+  if(deptRows.length){
+    deptLines.push(alignRow('', 'PROJ', 'ACT', 'B/W'));
+    deptRows.forEach(r => deptLines.push(alignRow(r.dept, r.proj, r.act, r.bw)));
+  }
+
+  let vpEntries = [];
+  document.querySelectorAll('#vpRows .vp-row').forEach(row => {
+    const dept = row.querySelector('.vp-name').textContent;
+    const pctRaw = row.querySelector('[data-vp-dept]').value;
+    if (pctRaw !== '') vpEntries.push({dept, pct: parseFloat(pctRaw)});
+  });
+  vpEntries.sort((a,b) => b.pct - a.pct);
+  let vpStoreTotal = null;
+  if(vpEntries.length){
+    const avg = vpEntries.reduce((s,v)=>s+v.pct,0) / vpEntries.length;
+    vpStoreTotal = Math.round(avg * 100) / 100;
+  }
+
+  // Build both plain text and HTML (bold caps headers) versions
+  const sections = [];
+
+  sections.push({header: null, body: 'Good morning, team!'});
+
+  let callOutsBody = dailyOrders;
+  if(orderLines.length){
+    callOutsBody += (callOutsBody ? '\n\n' : '') + 'ORDER SCHEDULE\n' + orderLines.map(l => '\u2022 ' + l).join('\n');
+  }
+  if(callOutsBody) sections.push({header:"TODAY'S CALL-OUTS", body: callOutsBody});
+
+  if(spLines.length) sections.push({header:'STORE PERFORMANCE', body: spLines.join('\n'), mono: true});
+
+  // DUG as aligned table: metric | ACT | GOAL
+  function dugRow(label, act, goal){
+    return label.padEnd(20) + act.padStart(9) + '  ' + goal.padStart(9);
+  }
+  let dp = [];
+  if(ordersPlaced) dp.push(`Orders Placed: ${ordersPlaced}`);
+  if(itemsOrdered) dp.push(`Items Ordered: ${itemsOrdered}`);
+  if(ordersPlaced || itemsOrdered) dp.push('');
+  if(ott || oth || presubs){
+    dp.push(dugRow('', 'ACT', 'GOAL'));
+    if(ott) dp.push(dugRow('On-Time Tilling', `${ott}%`, '100%'));
+    if(oth) dp.push(dugRow('On-Time Hand-Off', `${oth}%`, '100%'));
+    if(presubs) dp.push(dugRow('Pre-Subs', `${presubs}%`, '\u22643%'));
+  }
+  if(presubDept && presubCount) dp.push(`Pre-Subs Dept: ${presubDept} (${presubCount} items)`);
+  let dugBody = dp.join('\n');
+  if(dugNotes) dugBody += (dugBody ? '\n\n' : '') + dugNotes;
+  if(dugBody) sections.push({header:'DUG (DRIVE UP & GO)', body: dugBody, mono: true});
+
+  if(deptLines.length) sections.push({header:'DEPARTMENT SALES', body: deptLines.join('\n'), table: deptRows, mono: true});
+
+  // Vision Pro as aligned table: dept | ACT | GOAL(100%)
+  function vpRow(label, act, goal){
+    return label.padEnd(20) + act.padStart(9) + '  ' + goal.padStart(9);
+  }
+  if(vpEntries.length){
+    let vpLinesT = [];
+    vpLinesT.push(vpRow('', 'ACT', 'GOAL'));
+    vpEntries.forEach(v => vpLinesT.push(vpRow(v.dept, `${v.pct}%`, '100%')));
+    if(vpStoreTotal !== null) vpLinesT.push(vpRow('STORE TOTAL', `${vpStoreTotal}%`, '100%'));
+    sections.push({header:'VISION PRO (PROPER PRODUCTION)', body: vpLinesT.join('\n'), mono: true});
+  }
+
+  const foodSafety = document.getElementById('foodSafetyText').value.trim();
+  const safetyTopic = document.getElementById('safetyTopic').value.trim();
+  const safety = document.getElementById('safetyText').value.trim();
+
+  const standout1Dept = document.getElementById('standout1Name').textContent.replace('(AI picks)','').trim();
+  const standout1Reason = document.getElementById('standout1Reason').value.trim();
+  const standout2Dept = document.getElementById('standout2Name').textContent.replace('(AI picks)','').trim();
+  const standout2Reason = document.getElementById('standout2Reason').value.trim();
+
+  if(foodSafety) sections.push({header:'FOOD SAFETY SPOTLIGHT', body: foodSafety});
+  let safetyBody = '';
+  if(safetyTopic) safetyBody += `Topic of the Month: ${safetyTopic}\n`;
+  if(safety) safetyBody += safety;
+  if(safetyBody) sections.push({header:'SAFETY FOCUS', body: safetyBody});
+
+  let spotlightLines = [];
+  if(standout1Dept && standout1Reason) spotlightLines.push(`${standout1Dept} \u2014 ${standout1Reason}`);
+  if(standout2Dept && standout2Reason) spotlightLines.push(`${standout2Dept} \u2014 ${standout2Reason}`);
+  if(spotlightLines.length) sections.push({header:'STANDOUT DEPARTMENTS', body: spotlightLines.join('\n\n')});
+
+  let plain = `Subject: Daily Huddle \u2014 ${dateStr}\n\n`;
+  let html = `<div>Subject: Daily Huddle \u2014 ${dateStr}</div><br>`;
+  sections.forEach(s => {
+    if(s.header){
+      plain += s.header + '\n' + s.body + '\n\n';
+      if(s.mono){
+        // Monospace block keeps column alignment when pasted into Outlook
+        const esc = s.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        html += `<div><strong>${s.header}</strong></div>`
+          + `<pre style="font-family:Consolas,'Courier New',monospace;font-size:13px;margin:2px 0 0;">${esc}</pre><br>`;
+      } else {
+        html += `<div><strong>${s.header}</strong></div><div>${s.body.replace(/\n/g,'<br>')}</div><br>`;
+      }
+    } else {
+      plain += s.body + '\n\n';
+      html += `<div>${s.body}</div><br>`;
+    }
+  });
+
+  window.__lastPlain = plain.trim();
+  window.__lastHtml = html;
+  window.__lastSections = sections;
+  window.__lastDateStr = dateStr;
+  document.getElementById('output').textContent = plain.trim();
+  document.getElementById('outputCard').style.display = 'block';
+  document.getElementById('outputCard').scrollIntoView({behavior:'smooth'});
+}
+
+function copyOutput() {
+  if(!window.__lastHtml){ return; }
+  try{
+    const item = new ClipboardItem({
+      'text/plain': new Blob([window.__lastPlain], {type:'text/plain'}),
+      'text/html': new Blob([window.__lastHtml], {type:'text/html'})
+    });
+    navigator.clipboard.write([item]).then(showCopied).catch(()=>{ copyPlain(); });
+  }catch(e){ copyPlain(); }
+}
+function copyPlain(){
+  navigator.clipboard.writeText(window.__lastPlain || '').then(showCopied).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = window.__lastPlain || '';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showCopied();
+  });
+}
+function showCopied(){
+  const status = document.getElementById('copyStatus');
+  status.style.display = 'block';
+  setTimeout(()=> status.style.display='none', 2000);
+}
+
+function printPDF(){
+  if(!window.__lastSections){ return; }
+  const sections = window.__lastSections;
+  const dateStr = window.__lastDateStr || '';
+
+  const esc = (str) => String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  let blocks = '';
+  sections.forEach(s => {
+    if(!s.header){
+      blocks += `<div class="greeting">${esc(s.body)}</div>`;
+      return;
+    }
+    let inner;
+    if(s.table){
+      inner = `<table class="dt"><thead><tr><th>DEPT</th><th class="r">PROJ</th><th class="r">ACT</th><th class="r">B/W</th></tr></thead><tbody>`;
+      s.table.forEach(r => {
+        inner += `<tr><td>${esc(r.dept)}</td><td class="r">${esc(r.proj)}</td><td class="r">${esc(r.act)}</td><td class="r">${esc(r.bw)}</td></tr>`;
+      });
+      inner += `</tbody></table>`;
+    } else if(s.mono){
+      inner = `<pre class="mono">${esc(s.body)}</pre>`;
+    } else {
+      inner = `<div class="body">${esc(s.body).replace(/\n/g,'<br>')}</div>`;
+    }
+    blocks += `<div class="blk"><div class="hdr">${esc(s.header)}</div>${inner}</div>`;
+  });
+
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Daily Huddle \u2014 ${esc(dateStr)}</title>
+  <style>
+    @page { size: letter portrait; margin: 0.35in; }
+    * { box-sizing: border-box; }
+    html,body { margin:0; padding:0; }
+    body { font-family: Arial, Helvetica, sans-serif; color:#111; font-size:9px; line-height:1.22; }
+    .subject { font-weight:700; font-size:12px; margin-bottom:5px; border-bottom:2px solid #111; padding-bottom:3px; }
+    .greeting { margin-bottom:4px; }
+    .cols { column-count:2; column-gap:20px; }
+    .blk { break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid; margin-bottom:6px; }
+    .hdr { font-weight:700; text-transform:uppercase; font-size:9.5px; letter-spacing:0.02em; border-bottom:1.2px solid #111; margin-bottom:2px; padding-bottom:1px; }
+    .body { white-space:pre-wrap; }
+    .mono { font-family:'Courier New',monospace; font-size:8px; margin:0; white-space:pre; }
+    ul,li { margin:0; padding:0; list-style:none; }
+    .dt { width:100%; border-collapse:collapse; }
+    .dt th { text-align:left; font-size:8px; border-bottom:1px solid #999; padding:1px 6px 1px 0; }
+    .dt td { padding:0.5px 6px 0.5px 0; }
+    .dt .r { text-align:right; }
+  </style></head><body>
+    <div class="subject">Daily Huddle \u2014 ${esc(dateStr)}</div>
+    <div class="cols" id="cols">${blocks}</div>
+    <script>
+      (function(){
+        // One letter page minus 0.35in top+bottom margins, at 96dpi
+        var maxH = (11 - 0.70) * 96;
+        var body = document.body;
+        var size = 9;
+        function tooTall(){ return body.scrollHeight > maxH; }
+        var guard = 0;
+        while(tooTall() && size > 5.5 && guard < 40){
+          size -= 0.25;
+          body.style.fontSize = size + 'px';
+          guard++;
+        }
+        window.focus();
+        setTimeout(function(){ window.print(); }, 150);
+      })();
+    <\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if(!w){ alert('Please allow pop-ups to print the PDF.'); return; }
+  w.document.open();
+  w.document.write(doc);
+  w.document.close();
+}
+
+/* ============ PAGE NAVIGATION ============ */
+function switchPage(name){
+  document.getElementById('page-huddle').classList.toggle('active', name==='huddle');
+  document.getElementById('page-safety').classList.toggle('active', name==='safety');
+  document.getElementById('tab-huddle').classList.toggle('active', name==='huddle');
+  document.getElementById('tab-safety').classList.toggle('active', name==='safety');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ============ FOOD SAFETY WALK ============ */
+const fswEssentials = [
+  { t: "Hand sinks stocked (soap + towels), accessible, and hot water reaches 85\u00b0F within 60 sec", r: "Ecolab Q103" },
+  { t: "No expired RTE/TCS product on the sales floor or in prep areas", r: "Ecolab Q300" },
+  { t: "Cold TCS foods holding at 41\u00b0F or below", r: "Ecolab Q201" },
+  { t: "Hot TCS foods holding at 135\u00b0F or above", r: "Ecolab Q200" },
+  { t: "Sanitizer at correct concentration (quat 150-400 ppm / chlorine 50-100 ppm)", r: "Ecolab Q403" }
+];
+const fswLow = [
+  { t: "Personal items stored away from food; no eating/drinking/tobacco in prep areas", r: "Ecolab Q100" },
+  { t: "Produce washed with ProduceMaxx at correct strength (30-60 ppm); test strips available", r: "Ecolab Q401" },
+  { t: "Non-food contact surfaces clean \u2014 fryers, ovens, shelving, walls, touch points", r: "Ecolab Q505" },
+  { t: "Exterior doors closed when not in use; refuse area clean, no standing water", r: "Ecolab Q506" },
+  { t: "Physical facilities in good repair \u2014 floors, walls, baseboards, door sweeps, plumbing", r: "Ecolab Q507" },
+  { t: "Food and packaging stored at least 6 inches off the floor and covered/protected", r: "Ecolab Q600" },
+  { t: "Food-contact surfaces and utensils in good repair \u2014 no cracks, deep grooves, or rust", r: "Ecolab Q601" },
+  { t: "Non-food equipment in good repair; no excessive ice build-up; no cardboard lining shelves", r: "Ecolab Q602" },
+  { t: "Working calibrated thermometer and current, unexpired test strips on hand", r: "Ecolab Q700" },
+  { t: "Consumer advisory posted where raw/undercooked animal foods are sold", r: "Ecolab Q801" }
+];
+const fswMedium = [
+  { t: "Proper cooling methods in use \u2014 uncovered/loose, shallow pans, in the cooler", r: "Ecolab Q202" },
+  { t: "TCS foods thawed correctly \u2014 cooler, cold running water, microwave, or as part of cooking", r: "Ecolab Q203" },
+  { t: "RTE/TCS foods held over 24 hours are date-marked", r: "Ecolab Q301" },
+  { t: "Chemicals labeled and stored away from food and food-contact surfaces", r: "Ecolab Q404" },
+  { t: "Wiping cloths kept in sanitizer between uses; soiled cloths in laundry bin", r: "Ecolab Q405" },
+  { t: "Floors and drains clean; no stagnant standing water in prep/storage areas", r: "Ecolab Q503" },
+  { t: "Refrigerated full-service cases clean inside \u2014 tracks, fans, drip trays, shelving", r: "Ecolab Q504" },
+  { t: "Molluscan shellstock tags on file 90 days, dated with last sold date", r: "Ecolab Q800" }
+];
+const fswHigh = [
+  { t: "Proper handwashing observed \u2014 right times, right technique, at designated hand sinks only", r: "Ecolab Q101" },
+  { t: "No barehand contact with RTE foods; gloves changed when required, not reused", r: "Ecolab Q102" },
+  { t: "Time as Public Health Control (if used) labeled with discard time, not exceeding 4 hours", r: "Ecolab Q200/201" },
+  { t: "Raw foods stored below RTE; separate boards/utensils; no cross-contamination", r: "Ecolab Q400" },
+  { t: "Food-contact surfaces washed/rinsed/sanitized at least every 4 hours during use", r: "Ecolab Q402" },
+  { t: "Dish machine final rinse reaching 180\u00b0F (utensil surface 160\u00b0F+)", r: "Ecolab Q403" },
+  { t: "No evidence of pests \u2014 droppings, live/dead insects, gnaw marks, nesting", r: "Ecolab Q500" },
+  { t: "No sewage/drain back-up in any operating department (AUTO-FAIL if present)", r: "Ecolab Q501" },
+  { t: "Potable water available in all departments for prep, cleaning, handwashing (AUTO-FAIL if not)", r: "Ecolab Q502" }
+];
+const FSW_PER_LEVEL = 5;
+const FSW_POINTS = { essentials: 7, high: 7, medium: 4, low: 1 }; // deducted from 100 per FAILED item (Ecolab model)
+function fswRating(score){
+  if(score === 0) return 'Auto Fail';
+  if(score >= 97) return 'Best in Class';
+  if(score >= 93) return 'Very Good';
+  if(score >= 80) return 'Good';
+  if(score >= 70) return 'Needs Improvement';
+  if(score >= 60) return 'Underperforming';
+  return 'Poor';
+}
+const FSW_BANKS = { essentials: fswEssentials, high: fswHigh, medium: fswMedium, low: fswLow };
+
+function fswTodayKey(){ const d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+function fswPickRotating(levelName, bank, count){
+  const usedKey = 'fsw2_used_' + levelName;
+  let used = [];
+  try { used = JSON.parse(localStorage.getItem(usedKey) || '[]'); } catch(e){ used = []; }
+  const picks = [];
+  const pickedSet = {};
+  let remaining = bank.map((_,i)=>i).filter(i => used.indexOf(i) === -1);
+  while(picks.length < count && picks.length < bank.length){
+    if(remaining.length === 0){
+      used = picks.slice();
+      remaining = bank.map((_,i)=>i).filter(i => !pickedSet[i]);
+      if(remaining.length === 0) break;
+    }
+    const idx = remaining.splice(Math.floor(Math.random()*remaining.length), 1)[0];
+    picks.push(idx);
+    pickedSet[idx] = true;
+    if(used.indexOf(idx) === -1) used.push(idx);
+  }
+  localStorage.setItem(usedKey, JSON.stringify(used));
+  return picks.map(i => bank[i]);
+}
+
+function fswBuildDay(force){
+  const key = fswTodayKey();
+  const savedDayKey = localStorage.getItem('fsw2_dayKey');
+  let dayData;
+  if(!force && savedDayKey === key){
+    try { dayData = JSON.parse(localStorage.getItem('fsw2_dayData')); } catch(e){ dayData = null; }
+  }
+  if(force || !dayData){
+    dayData = {
+      startTime: Date.now(),
+      essentials: fswEssentials.map(x => ({...x, val:null})),
+      high: fswPickRotating('high', fswHigh, FSW_PER_LEVEL).map(x => ({...x, val:null})),
+      medium: fswPickRotating('medium', fswMedium, FSW_PER_LEVEL).map(x => ({...x, val:null})),
+      low: fswPickRotating('low', fswLow, FSW_PER_LEVEL).map(x => ({...x, val:null}))
+    };
+    localStorage.setItem('fsw2_dayKey', key);
+    localStorage.setItem('fsw2_dayData', JSON.stringify(dayData));
+  }
+  if(!dayData.startTime){ dayData.startTime = Date.now(); }
+  return dayData;
+}
+
+let fswCurrentDay = null;
+
+// When an item is marked N/A, swap in a fresh question from the same bank
+// that isn't already shown today. Falls back to marking N/A if the bank is exhausted.
+function fswSwapItem(levelKey, itemIndex){
+  const bank = FSW_BANKS[levelKey];
+  const shownTexts = fswCurrentDay[levelKey].map(x => x.t);
+  const candidates = bank.filter(q => !shownTexts.includes(q.t));
+  if(candidates.length === 0){
+    // Nothing left to swap to — just mark it N/A so it drops out of scoring
+    fswCurrentDay[levelKey][itemIndex].val = 'N/A';
+    fswSave(); fswRender();
+    return;
+  }
+  const fresh = candidates[Math.floor(Math.random() * candidates.length)];
+  // Track it as used so the no-repeat rotation stays honest
+  try {
+    const usedKey = 'fsw2_used_' + levelKey;
+    let used = JSON.parse(localStorage.getItem(usedKey) || '[]');
+    const idx = bank.findIndex(q => q.t === fresh.t);
+    if(idx !== -1 && used.indexOf(idx) === -1){ used.push(idx); localStorage.setItem(usedKey, JSON.stringify(used)); }
+  } catch(e){}
+  fswCurrentDay[levelKey][itemIndex] = {...fresh, val:null};
+  fswSave(); fswRender();
+}
+
+function fswRender(){
+  const cl = document.getElementById('checklist');
+  cl.innerHTML = '';
+  const groups = [
+    { key:'essentials', label:'Daily Essentials', cls:'essentials' },
+    { key:'high', label:'High Risk', cls:'high' },
+    { key:'medium', label:'Medium Risk', cls:'medium' },
+    { key:'low', label:'Low Risk', cls:'low' }
+  ];
+  groups.forEach(g => {
+    const items = fswCurrentDay[g.key];
+    if(!items || !items.length) return;
+    const wrap = document.createElement('div');
+    wrap.className = g.cls;
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = g.label;
+    wrap.appendChild(label);
+    items.forEach((item, itemIdx) => {
+      const row = document.createElement('div');
+      row.className = 'item';
+      const txt = document.createElement('div');
+      txt.className = 'item-text';
+      const pts = FSW_POINTS[g.key];
+      txt.innerHTML = item.t + '<span class="ref">' + item.r + ' \u00b7 \u2212' + pts + ' if failed</span>';
+      const pf = document.createElement('div');
+      pf.className = 'pf';
+      const passBtn = document.createElement('button');
+      passBtn.className = 'pass' + (item.val==='Pass'?' sel':'');
+      passBtn.textContent = 'Pass';
+      const failBtn = document.createElement('button');
+      failBtn.className = 'fail' + (item.val==='Fail'?' sel':'');
+      failBtn.textContent = 'Fail';
+      const naBtn = document.createElement('button');
+      naBtn.className = 'na';
+      naBtn.textContent = 'N/A';
+      passBtn.addEventListener('click', () => { item.val='Pass'; fswSave(); fswRender(); });
+      failBtn.addEventListener('click', () => { item.val='Fail'; fswSave(); fswRender(); });
+      naBtn.addEventListener('click', () => { fswSwapItem(g.key, itemIdx); });
+      pf.appendChild(passBtn); pf.appendChild(failBtn); pf.appendChild(naBtn);
+      row.appendChild(txt); row.appendChild(pf);
+      wrap.appendChild(row);
+    });
+    cl.appendChild(wrap);
+  });
+  fswUpdateProgress();
+}
+
+function fswAllItems(){ return [...fswCurrentDay.essentials, ...fswCurrentDay.high, ...fswCurrentDay.medium, ...fswCurrentDay.low]; }
+function fswUpdateProgress(){
+  const items = fswAllItems();
+  const answered = items.filter(x => x.val).length;
+  document.getElementById('progressText').textContent = `${answered} of ${items.length} answered`;
+  document.getElementById('barFill').style.width = items.length ? (answered/items.length*100)+'%' : '0%';
+}
+function fswSave(){ localStorage.setItem('fsw2_dayData', JSON.stringify(fswCurrentDay)); }
+function newWalkDay(){
+  if(!confirm("Generate a fresh set of rotating questions? This clears your current answers.")) return;
+  fswCurrentDay = fswBuildDay(true);
+  fswRender();
+}
+
+function fswValidate(){
+  const err = document.getElementById('errMsg');
+  const name = document.getElementById('fName').value.trim();
+  const dept = document.getElementById('fDept').value.trim();
+  const email = document.getElementById('fEmail').value.trim();
+  if(!name || !dept || !email){
+    err.textContent = 'Please fill in your name, department, and store email first.';
+    err.style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+    return false;
+  }
+  const unanswered = fswAllItems().filter(x => !x.val);
+  if(unanswered.length){
+    err.textContent = unanswered.length + ' item(s) still need a Pass or Fail before you can submit.';
+    err.style.display = 'block';
+    return false;
+  }
+  err.style.display = 'none';
+  return true;
+}
+
+function fswBuildReport(){
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const name = document.getElementById('fName').value.trim();
+  const dept = document.getElementById('fDept').value.trim();
+  const email = document.getElementById('fEmail').value.trim();
+  const wo = document.getElementById('fWorkOrder').value.trim();
+  const notes = document.getElementById('fNotes').value.trim();
+
+  const elapsedMs = Date.now() - (fswCurrentDay.startTime || Date.now());
+  const mins = Math.floor(elapsedMs/60000);
+  const secs = Math.floor((elapsedMs%60000)/1000);
+  const timeSpent = mins + 'm ' + pad(secs) + 's';
+
+  const items = fswAllItems();
+  const passCount = items.filter(x => x.val==='Pass').length;
+  const failCount = items.filter(x => x.val==='Fail').length;
+
+  // Ecolab model: start at 100, deduct points for each FAILED item by risk level
+  const levelKeys = ['essentials','high','medium','low'];
+  let deductions = 0;
+  levelKeys.forEach(k => {
+    const pts = FSW_POINTS[k];
+    fswCurrentDay[k].forEach(item => {
+      if(item.val === 'Fail') deductions += pts;
+    });
+  });
+  const score = Math.max(0, 100 - deductions);
+  const rating = fswRating(score);
+
+  let lines = [];
+  lines.push('DAILY FOOD SAFETY WALK');
+  lines.push(dateStr);
+  lines.push('');
+  lines.push('Completed By: ' + name);
+  lines.push('Department: ' + dept);
+  lines.push('Store Email: ' + email);
+  lines.push('Time Spent: ' + timeSpent);
+  lines.push('Score: ' + score + ' / 100 \u2014 ' + rating);
+  lines.push('Deductions: -' + deductions + ' pts (' + passCount + ' Pass / ' + failCount + ' Fail)');
+  lines.push('');
+
+  const groups = [['essentials','DAILY ESSENTIALS'],['high','HIGH RISK'],['medium','MEDIUM RISK'],['low','LOW RISK']];
+  groups.forEach(([k,label]) => {
+    const pts = FSW_POINTS[k];
+    lines.push(label + ' (\u2212' + pts + ' if failed)');
+    fswCurrentDay[k].forEach(item => {
+      lines.push('  [' + (item.val==='Pass'?'PASS':'FAIL') + '] ' + item.t + ' (' + item.r + ')');
+    });
+    lines.push('');
+  });
+
+  if(wo){ lines.push('WORK ORDER AREA / ASSET ID:'); lines.push('  ' + wo); lines.push(''); }
+  if(notes){ lines.push('NOTES:'); lines.push('  ' + notes); lines.push(''); }
+
+  const fails = items.filter(x => x.val==='Fail');
+  if(fails.length){
+    lines.push('ITEMS NEEDING ATTENTION (' + fails.length + '):');
+    fails.forEach(item => lines.push('  - ' + item.t + ' (' + item.r + ')'));
+  }
+
+  return lines.join('\n');
+}
+
+function doEmailWalk(){
+  if(!fswValidate()) return;
+  const report = fswBuildReport();
+  const d = new Date();
+  const dept = document.getElementById('fDept').value.trim();
+  const subject = 'Food Safety Walk - ' + dept + ' - ' + d.toLocaleDateString('en-US');
+  const mailto = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(report);
+  window.location.href = mailto;
+}
+
+function doPrintWalk(){
+  if(!fswValidate()) return;
+  window.print();
+}
+
+fswCurrentDay = fswBuildDay(false);
+fswRender();
+</script>
+</body>
+</html>
