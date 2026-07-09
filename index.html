@@ -128,6 +128,10 @@
   .src[open] summary { margin-bottom: 6px; }
   .src p { color: var(--sub-text); line-height: 1.5; margin: 0; }
   .src b { color: var(--text); font-weight: 600; }
+  .wchat-msg { padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+  .wchat-user { background: var(--input-bg); border: 1px solid var(--line); }
+  .wchat-ai { background: var(--accent-soft); border: 1px solid var(--accent); }
+  .wchat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sub-text); font-weight: 700; margin-bottom: 4px; display: block; }
   .order-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
   .order-row input.otime { flex: 0 0 96px; }
   .order-row input.odesc { flex: 1; }
@@ -345,7 +349,7 @@
   <div class="card no-print">
     <h2>Walk Details</h2>
     <details class="src"><summary>How this walk is scored</summary>
-    <p>Questions and point values come directly from <b>Ecolab</b> audits. Every walk starts at <b>100</b>; each failed item deducts points by risk level \u2014 <b>High \u22127</b>, <b>Medium \u22124</b>, <b>Low \u22121</b>. Ratings: 97\u2013100 Best in Class, 93\u201396 Very Good, 80\u201392 Good, 70\u201379 Needs Improvement, 60\u201369 Underperforming, under 60 Poor. Mark <b>N/A</b> to swap in a different question.</p>
+    <p>30 questions a day: 5 Daily Essentials (always shown) plus 10 High, 8 Medium, and 7 Low Risk, pulled at random from the full question banks \u2014 point values follow <b>Ecolab</b>'s risk-based model. Every walk starts at <b>100</b>; each failed item deducts points by risk level \u2014 <b>Essentials \u22127</b>, <b>High \u22127</b>, <b>Medium \u22124</b>, <b>Low \u22121</b>. A score of <b>90 or above is a PASS</b>, anything below is a <b>FAIL</b>. All 5 Daily Essentials and 2 of the High Risk items are <b>Auto-Fail</b> \u2014 failing any one of those drops the score straight to 0 regardless of everything else, since those are the true non-negotiables (soap and hand sinks, proper hot/cold holding, sanitizer strength, no expired product). Ratings: 97\u2013100 Best in Class, 93\u201396 Very Good, 80\u201392 Good, 70\u201379 Needs Improvement, 60\u201369 Underperforming, under 60 Poor. Mark <b>N/A</b> and a different question from the same risk level swaps in \u2014 you'll never get stuck with one that doesn't apply.</p>
     </details>
     <label>Audit Completed By <span class="req">*</span></label>
     <input type="text" id="fName" placeholder="Your name">
@@ -376,6 +380,20 @@
     <button class="btn-secondary" onclick="doEmailWalk()">Email My Walk</button>
     <button class="btn-secondary" onclick="doPrintWalk()">Print</button>
     <button class="btn-secondary" onclick="newWalkDay()">New Day's Questions</button>
+  </div>
+
+  <div class="card no-print">
+    <h2>Ask About a Situation</h2>
+    <div style="font-size:12px; color: var(--sub-text); margin: 0 0 12px; letter-spacing: 0.02em;">Describe what you're seeing and it'll tell you whether it's a violation, which category it falls under, and ask a follow-up if it needs more detail. This is a scratch tool \u2014 it doesn't get saved or printed.</div>
+    <div id="walkChatLog"></div>
+    <div class="row" style="margin-top:10px;">
+      <div><input type="text" id="walkChatInput" placeholder="e.g., grease buildup on the floor under the dunnage racks..." onkeydown="if(event.key==='Enter'){event.preventDefault();askWalkQuestion();}"></div>
+    </div>
+    <div class="copy-bar" style="margin-top:8px;">
+      <button class="btn-secondary" type="button" onclick="askWalkQuestion()">Ask</button>
+      <button class="btn-shuffle" type="button" onclick="clearWalkChat()">Clear</button>
+    </div>
+    <div id="walkChatStatus" style="font-size:12px; color:var(--sub-text); margin-top:8px; display:none;"></div>
   </div>
 
   <div class="walk-note no-print">Essentials show every day. Rotating questions vary with no-repeat logic so you cover the whole audit over time. Every item needs a Pass or Fail before emailing or printing.</div>
@@ -1068,11 +1086,11 @@ function switchPage(name){
 
 /* ============ FOOD SAFETY WALK ============ */
 const fswEssentials = [
-  { t: "Hand sinks stocked (soap + towels), accessible, and hot water reaches 85\u00b0F within 60 sec", r: "Ecolab Q103" },
-  { t: "No expired RTE/TCS product on the sales floor or in prep areas", r: "Ecolab Q300" },
-  { t: "Cold TCS foods holding at 41\u00b0F or below", r: "Ecolab Q201" },
-  { t: "Hot TCS foods holding at 135\u00b0F or above", r: "Ecolab Q200" },
-  { t: "Sanitizer at correct concentration (quat 150-400 ppm / chlorine 50-100 ppm)", r: "Ecolab Q403" }
+  { t: "Hand sinks stocked (soap + towels), accessible, and hot water reaches 85\u00b0F within 60 sec", r: "Ecolab Q103", auto: true },
+  { t: "No expired RTE/TCS product on the sales floor or in prep areas", r: "Ecolab Q300", auto: true },
+  { t: "Cold TCS foods holding at 41\u00b0F or below", r: "Ecolab Q201", auto: true },
+  { t: "Hot TCS foods holding at 135\u00b0F or above", r: "Ecolab Q200", auto: true },
+  { t: "Sanitizer at correct concentration (quat 150-400 ppm / chlorine 50-100 ppm)", r: "Ecolab Q403", auto: true }
 ];
 const fswLow = [
   { t: "Personal items stored away from food; no eating/drinking/tobacco in prep areas", r: "Ecolab Q100" },
@@ -1084,7 +1102,11 @@ const fswLow = [
   { t: "Food-contact surfaces and utensils in good repair \u2014 no cracks, deep grooves, or rust", r: "Ecolab Q601" },
   { t: "Non-food equipment in good repair; no excessive ice build-up; no cardboard lining shelves", r: "Ecolab Q602" },
   { t: "Working calibrated thermometer and current, unexpired test strips on hand", r: "Ecolab Q700" },
-  { t: "Consumer advisory posted where raw/undercooked animal foods are sold", r: "Ecolab Q801" }
+  { t: "Consumer advisory posted where raw/undercooked animal foods are sold", r: "Ecolab Q801" },
+  { t: "Employee break area separated from food prep and storage areas", r: "Ecolab Q603" },
+  { t: "Single-service items (cups, lids, containers) stored covered and off the floor", r: "Ecolab Q604" },
+  { t: "Lighting adequate and properly shielded in prep and storage areas", r: "Ecolab Q701" },
+  { t: "Restrooms stocked, clean, and doors self-closing", r: "Ecolab Q702" }
 ];
 const fswMedium = [
   { t: "Proper cooling methods in use \u2014 uncovered/loose, shallow pans, in the cooler", r: "Ecolab Q202" },
@@ -1094,7 +1116,13 @@ const fswMedium = [
   { t: "Wiping cloths kept in sanitizer between uses; soiled cloths in laundry bin", r: "Ecolab Q405" },
   { t: "Floors and drains clean; no stagnant standing water in prep/storage areas", r: "Ecolab Q503" },
   { t: "Refrigerated full-service cases clean inside \u2014 tracks, fans, drip trays, shelving", r: "Ecolab Q504" },
-  { t: "Molluscan shellstock tags on file 90 days, dated with last sold date", r: "Ecolab Q800" }
+  { t: "Molluscan shellstock tags on file 90 days, dated with last sold date", r: "Ecolab Q800" },
+  { t: "Food thermometers calibrated on a routine schedule (ice-point or boiling-point method)", r: "Ecolab Q406" },
+  { t: "Retail scales calibration current and verified", r: "Ecolab Q407" },
+  { t: "Open dates / use-by dates entered accurately for prepared and repacked foods", r: "Ecolab Q302" },
+  { t: "Damaged, dented, or bulging cans and packaging pulled from sale", r: "Ecolab Q303" },
+  { t: "Employee beverages covered and stored below or away from prep surfaces", r: "Ecolab Q104" },
+  { t: "Hair restraints worn in prep areas per policy", r: "Ecolab Q105" }
 ];
 const fswHigh = [
   { t: "Proper handwashing observed \u2014 right times, right technique, at designated hand sinks only", r: "Ecolab Q101" },
@@ -1104,11 +1132,19 @@ const fswHigh = [
   { t: "Food-contact surfaces washed/rinsed/sanitized at least every 4 hours during use", r: "Ecolab Q402" },
   { t: "Dish machine final rinse reaching 180\u00b0F (utensil surface 160\u00b0F+)", r: "Ecolab Q403" },
   { t: "No evidence of pests \u2014 droppings, live/dead insects, gnaw marks, nesting", r: "Ecolab Q500" },
-  { t: "No sewage/drain back-up in any operating department (AUTO-FAIL if present)", r: "Ecolab Q501" },
-  { t: "Potable water available in all departments for prep, cleaning, handwashing (AUTO-FAIL if not)", r: "Ecolab Q502" }
+  { t: "No sewage/drain back-up in any operating department", r: "Ecolab Q501", auto: true },
+  { t: "Potable water available in all departments for prep, cleaning, handwashing", r: "Ecolab Q502", auto: true },
+  { t: "Employees with vomiting, diarrhea, or jaundice excluded from work per illness policy", r: "Ecolab Q106" },
+  { t: "Food from approved source only \u2014 no unapproved home-prepared or unlabeled product", r: "Ecolab Q304" },
+  { t: "Cross-contact controlled for major allergens \u2014 dedicated equipment/utensils where required", r: "Ecolab Q305" },
+  { t: "Cooked or reheated TCS foods reach required temp (165\u00b0F within 2 hrs) before hot-holding", r: "Ecolab Q204" },
+  { t: "RTE TCS food cooled correctly \u2014 135\u00b0F to 70\u00b0F within 2 hours, then to 41\u00b0F within 4 more hours", r: "Ecolab Q205" },
+  { t: "No cross-connection/backflow hazard at hose bibs, mop sinks, or ice machines", r: "Ecolab Q900" },
+  { t: "Certified Food Protection Manager on-site or reachable per department requirement", r: "Ecolab Q107" }
 ];
-const FSW_PER_LEVEL = 5;
+const FSW_PICKS = { high: 10, medium: 8, low: 7 }; // essentials are fixed at all 5, always shown
 const FSW_POINTS = { essentials: 7, high: 7, medium: 4, low: 1 }; // deducted from 100 per FAILED item (Ecolab model)
+const FSW_PASS_SCORE = 90; // score at or above this = PASS
 function fswRating(score){
   if(score === 0) return 'Auto Fail';
   if(score >= 97) return 'Best in Class';
@@ -1155,9 +1191,9 @@ function fswBuildDay(force){
     dayData = {
       startTime: Date.now(),
       essentials: fswEssentials.map(x => ({...x, val:null})),
-      high: fswPickRotating('high', fswHigh, FSW_PER_LEVEL).map(x => ({...x, val:null})),
-      medium: fswPickRotating('medium', fswMedium, FSW_PER_LEVEL).map(x => ({...x, val:null})),
-      low: fswPickRotating('low', fswLow, FSW_PER_LEVEL).map(x => ({...x, val:null}))
+      high: fswPickRotating('high', fswHigh, FSW_PICKS.high).map(x => ({...x, val:null})),
+      medium: fswPickRotating('medium', fswMedium, FSW_PICKS.medium).map(x => ({...x, val:null})),
+      low: fswPickRotating('low', fswLow, FSW_PICKS.low).map(x => ({...x, val:null}))
     };
     localStorage.setItem('fsw2_dayKey', key);
     localStorage.setItem('fsw2_dayData', JSON.stringify(dayData));
@@ -1216,7 +1252,8 @@ function fswRender(){
       const txt = document.createElement('div');
       txt.className = 'item-text';
       const pts = FSW_POINTS[g.key];
-      txt.innerHTML = item.t + '<span class="ref">' + item.r + ' \u00b7 \u2212' + pts + ' if failed</span>';
+      const autoTag = item.auto ? ' \u00b7 <span style="color:var(--accent);font-weight:700;">AUTO-FAIL</span>' : '';
+      txt.innerHTML = item.t + '<span class="ref">' + item.r + ' \u00b7 \u2212' + pts + ' if failed' + autoTag + '</span>';
       const pf = document.createElement('div');
       pf.className = 'pf';
       const passBtn = document.createElement('button');
@@ -1252,6 +1289,60 @@ function newWalkDay(){
   if(!confirm("Generate a fresh set of rotating questions? This clears your current answers.")) return;
   fswCurrentDay = fswBuildDay(true);
   fswRender();
+}
+
+/* ============ ASK ABOUT A SITUATION (walk Q&A chat) ============ */
+let walkChatHistory = [];
+
+function renderWalkChat(){
+  const log = document.getElementById('walkChatLog');
+  log.innerHTML = '';
+  walkChatHistory.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = 'wchat-msg ' + (msg.role === 'user' ? 'wchat-user' : 'wchat-ai');
+    const label = document.createElement('span');
+    label.className = 'wchat-label';
+    label.textContent = msg.role === 'user' ? 'You' : 'Answer';
+    div.appendChild(label);
+    div.appendChild(document.createTextNode(msg.content));
+    log.appendChild(div);
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearWalkChat(){
+  walkChatHistory = [];
+  renderWalkChat();
+  document.getElementById('walkChatStatus').style.display = 'none';
+}
+
+async function askWalkQuestion(){
+  const input = document.getElementById('walkChatInput');
+  const question = input.value.trim();
+  if(!question) return;
+  const status = document.getElementById('walkChatStatus');
+
+  walkChatHistory.push({ role: 'user', content: question });
+  renderWalkChat();
+  input.value = '';
+
+  status.style.display = 'block';
+  status.textContent = 'Thinking\u2026';
+
+  try {
+    const res = await fetch('/.netlify/functions/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: 'walkQuestion', data: { history: walkChatHistory } })
+    });
+    if(!res.ok){ throw new Error('HTTP ' + res.status); }
+    const out = await res.json();
+    walkChatHistory.push({ role: 'assistant', content: out.answer || "Didn't get a usable answer \u2014 try rephrasing." });
+    renderWalkChat();
+    status.style.display = 'none';
+  } catch(err){
+    status.textContent = "Couldn't reach the AI. Check that the site is deployed on Netlify with an API key set.";
+  }
 }
 
 function fswValidate(){
@@ -1296,14 +1387,25 @@ function fswBuildReport(){
   // Ecolab model: start at 100, deduct points for each FAILED item by risk level
   const levelKeys = ['essentials','high','medium','low'];
   let deductions = 0;
+  let categoryFails = { essentials: 0, high: 0, medium: 0, low: 0 };
+  let categoryPoints = { essentials: 0, high: 0, medium: 0, low: 0 };
+  let autoFailItems = [];
   levelKeys.forEach(k => {
     const pts = FSW_POINTS[k];
     fswCurrentDay[k].forEach(item => {
-      if(item.val === 'Fail') deductions += pts;
+      if(item.val === 'Fail'){
+        deductions += pts;
+        categoryFails[k]++;
+        categoryPoints[k] -= pts;
+        if(item.auto) autoFailItems.push(item);
+      }
     });
   });
-  const score = Math.max(0, 100 - deductions);
+  const rawScore = Math.max(0, 100 - deductions);
+  const score = autoFailItems.length ? 0 : rawScore;
   const rating = fswRating(score);
+  const passed = score >= FSW_PASS_SCORE;
+  const passFailLabel = autoFailItems.length ? 'FAIL \u2014 AUTO-FAIL TRIGGERED' : (passed ? 'PASS' : 'FAIL');
 
   let lines = [];
   lines.push('DAILY FOOD SAFETY WALK');
@@ -1313,8 +1415,19 @@ function fswBuildReport(){
   lines.push('Department: ' + dept);
   lines.push('Store Email: ' + email);
   lines.push('Time Spent: ' + timeSpent);
-  lines.push('Score: ' + score + ' / 100 \u2014 ' + rating);
+  lines.push('');
+  lines.push('RESULT: ' + passFailLabel + '  (Score: ' + score + ' / 100 \u2014 ' + rating + ', pass line is ' + FSW_PASS_SCORE + ')');
+  if(autoFailItems.length){
+    lines.push('Auto-Fail Trigger' + (autoFailItems.length>1?'s':'') + ':');
+    autoFailItems.forEach(it => lines.push('  - ' + it.t + ' (' + it.r + ')'));
+  }
   lines.push('Deductions: -' + deductions + ' pts (' + passCount + ' Pass / ' + failCount + ' Fail)');
+  lines.push('');
+  lines.push('DEPARTMENT OVERVIEW');
+  lines.push('  Essentials \u2014 ' + categoryFails.essentials + ' failed, ' + categoryPoints.essentials + ' pts');
+  lines.push('  High Risk  \u2014 ' + categoryFails.high + ' failed, ' + categoryPoints.high + ' pts');
+  lines.push('  Medium Risk\u2014 ' + categoryFails.medium + ' failed, ' + categoryPoints.medium + ' pts');
+  lines.push('  Low Risk   \u2014 ' + categoryFails.low + ' failed, ' + categoryPoints.low + ' pts');
   lines.push('');
 
   const groups = [['essentials','DAILY ESSENTIALS'],['high','HIGH RISK'],['medium','MEDIUM RISK'],['low','LOW RISK']];
@@ -1332,8 +1445,8 @@ function fswBuildReport(){
 
   const fails = items.filter(x => x.val==='Fail');
   if(fails.length){
-    lines.push('ITEMS NEEDING ATTENTION (' + fails.length + '):');
-    fails.forEach(item => lines.push('  - ' + item.t + ' (' + item.r + ')'));
+    lines.push('OPPORTUNITIES (' + fails.length + '):');
+    fails.forEach(item => lines.push('  - ' + item.t + ' (' + item.r + ')' + (item.auto ? '  [AUTO-FAIL ITEM]' : '')));
   }
 
   return lines.join('\n');
