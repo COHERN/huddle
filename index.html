@@ -247,7 +247,7 @@
     <div><label>Labor Actual (%)</label><input type="text" inputmode="decimal" id="laborActual" placeholder="14.5"></div>
     <div><label>Labor Projection (%) <span style="color:#9ca3af;font-weight:400;">(saved)</span></label><input type="text" inputmode="decimal" id="laborGoal" placeholder="14.0"></div>
   </div>
-  <label>Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts from numbers \u2014 editable)</span></label>
+  <label>Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts from numbers — editable)</span></label>
   <button class="btn-shuffle" type="button" onclick="draftStoreSummary()">Draft Summary</button>
   <textarea id="storeSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
 </div>
@@ -284,7 +284,7 @@
   <p>Pulled from <b>Empower</b>, each department block, <b>Total</b> column. PROJ = Target Sales; ACT = Actual Sales. Dept codes map like this: 301 Grocery + 311 GMHBC = <b>Center of Store</b>; 306 Food Service + 309 Deli = <b>Deli</b>; 303 = Liquor, 315 = Floral, 316 = Bakery, 328 Coffee Bar = Starbucks, 329 = Produce, 330 = Seafood, 333 = Meat.</p>
   </details>
   <div id="deptRows"></div>
-  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts \u2014 editable)</span></label>
+  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts — editable)</span></label>
   <button class="btn-shuffle" type="button" onclick="draftDeptSummary()">Draft Summary</button>
   <textarea id="deptSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
 </div>
@@ -292,10 +292,10 @@
 <div class="card">
   <h2>Vision Pro</h2>
   <details class="src"><summary>Where these numbers come from</summary>
-  <p>Pulled from the <b>Vision Pro</b> report, Performance by Department \u2014 each department's <b>Proper Production Performance %</b>. Higher completion generally tracks with better sales.</p>
+  <p>Pulled from the <b>Vision Pro</b> report, Performance by Department — each department's <b>Proper Production Performance %</b>. Higher completion generally tracks with better sales.</p>
   </details>
   <div id="vpRows"></div>
-  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts &amp; correlates with sales \u2014 editable)</span></label>
+  <label style="margin-top:16px;">Summary <span style="color:var(--sub-text);font-weight:400;">(auto-drafts &amp; correlates with sales — editable)</span></label>
   <button class="btn-shuffle" type="button" onclick="draftVpSummary()">Draft Summary</button>
   <textarea id="vpSummary" placeholder="Click Draft Summary, or write your own..."></textarea>
 </div>
@@ -349,7 +349,7 @@
   <div class="card no-print">
     <h2>Walk Details</h2>
     <details class="src"><summary>How this walk is scored</summary>
-    <p>30 questions a day: 5 Daily Essentials (always shown) plus 10 High, 8 Medium, and 7 Low Risk, pulled at random from the full question banks \u2014 point values follow <b>Ecolab</b>'s risk-based model. Every walk starts at <b>100</b>; each failed item deducts points by risk level \u2014 <b>Essentials \u22127</b>, <b>High \u22127</b>, <b>Medium \u22124</b>, <b>Low \u22121</b>. A score of <b>90 or above is a PASS</b>, anything below is a <b>FAIL</b>. All 5 Daily Essentials and 2 of the High Risk items are <b>Auto-Fail</b> \u2014 failing any one of those drops the score straight to 0 regardless of everything else, since those are the true non-negotiables (soap and hand sinks, proper hot/cold holding, sanitizer strength, no expired product). Ratings: 97\u2013100 Best in Class, 93\u201396 Very Good, 80\u201392 Good, 70\u201379 Needs Improvement, 60\u201369 Underperforming, under 60 Poor. Mark <b>N/A</b> and a different question from the same risk level swaps in \u2014 you'll never get stuck with one that doesn't apply.</p>
+    <p>30 questions a day: 5 Daily Essentials (always shown) plus 10 High, 8 Medium, and 7 Low Risk, pulled at random from the full question banks — point values follow <b>Ecolab</b>'s risk-based model. Every walk starts at <b>100</b>; each failed item deducts points by risk level — <b>Essentials −7</b>, <b>High −7</b>, <b>Medium −4</b>, <b>Low −1</b>. A score of <b>90 or above is a PASS</b>, anything below is a <b>FAIL</b>. All 5 Daily Essentials and 2 of the High Risk items are <b>Auto-Fail</b> — failing any one of those drops the score straight to 0 regardless of everything else, since those are the true non-negotiables (soap and hand sinks, proper hot/cold holding, sanitizer strength, no expired product). Ratings: 97–100 Best in Class, 93–96 Very Good, 80–92 Good, 70–79 Needs Improvement, 60–69 Underperforming, under 60 Poor. Mark <b>N/A</b> and a different question from the same risk level swaps in — you'll never get stuck with one that doesn't apply.</p>
     </details>
     <label>Audit Completed By <span class="req">*</span></label>
     <input type="text" id="fName" placeholder="Your name">
@@ -384,7 +384,7 @@
 
   <div class="card no-print">
     <h2>Ask About a Situation</h2>
-    <div style="font-size:12px; color: var(--sub-text); margin: 0 0 12px; letter-spacing: 0.02em;">Describe what you're seeing and it'll tell you whether it's a violation, which category it falls under, and ask a follow-up if it needs more detail. This is a scratch tool \u2014 it doesn't get saved or printed.</div>
+    <div style="font-size:12px; color: var(--sub-text); margin: 0 0 12px; letter-spacing: 0.02em;">Describe what you're seeing and it'll tell you whether it's a violation, which category it falls under, and ask a follow-up if it needs more detail. This is a scratch tool — it doesn't get saved or printed.</div>
     <div id="walkChatLog"></div>
     <div class="row" style="margin-top:10px;">
       <div><input type="text" id="walkChatInput" placeholder="e.g., grease buildup on the floor under the dunnage racks..." onkeydown="if(event.key==='Enter'){event.preventDefault();askWalkQuestion();}"></div>
